@@ -30,7 +30,7 @@ void DebugLine (Rest const&...	rest)
 
 namespace Dodekafon {
 
-	const size_t Empty = std::numeric_limits<size_t>::max();
+	const size_t Empty = std::numeric_limits<size_t>::min();
 	const size_t Invalid = std::numeric_limits<size_t>::max() - 1;
 	const size_t Endpoint = std::numeric_limits<size_t>::max() - 2;
 
@@ -38,8 +38,47 @@ namespace Dodekafon {
 	// all the integer values of the [1,12] closed interval, and the absolut values
 	// of the differences are all the elements of the [1, 11] closed interval, are representing all the 11 spans.
 
+	class Note {
+		size_t			m_pitch{};	// Integer 1..12 representing the pitch, 0 denotes the emptyness
+		int32_t			m_prev{};	// Integer -11..+11 representing the previous interval
+		int32_t			m_next{};	// Integer -11..+11 representing the next interval
+	public:
+	//constructors
+		Note() {}
+		Note(size_t note)
+			:	m_pitch(note)
+		{
+		}
+
+		size_t	Pitch() const
+		{
+			return	m_pitch;
+		}
+
+		void	Pitch(size_t newPitch)
+		{
+			m_pitch = newPitch;
+		}
+
+	};
+
+	class Interval {
+		size_t			m_width{};	// Integer 0..11 representing the pitch difference, 0 denotes the emptyness
+		size_t			m_prev{};	// Integer 0..12 representing the previous pitch, 0 denotes the emptyness
+		size_t			m_next{};	// Integer 0..12 representing the next pitch, 0 denotes the emptyness
+	public:
+	//constructors
+		Interval() {}
+	};
+
+	// Why cant find this:
+	//  3, 10, 2, 11, 1, 12, 6, 7, 5, 8, 4, 9,
+	//	  7, 8, 9, 10, 11, 6, 1, 2, 3, 4, 5,
+	// Internal:
+	//  2, 9, 1, 10, 0, 11, 5, 6, 4, 7, 3, 8,
+
 	class Spans {
-		vector<size_t>    m_spans;
+		vector<Note>    m_notes;
 	public:
 	//constructors
 		Spans (size_t n);
@@ -47,30 +86,31 @@ namespace Dodekafon {
 
 		size_t Size () const;
 
-		const size_t& operator [] (size_t i) const;
-		size_t& operator [] (size_t i);
+		const Note& operator [] (size_t i) const;
+		Note& operator [] (size_t i);
 	};
 
 	Spans::Spans (size_t n)
-		: m_spans (n, Empty)
+		: m_notes (n, Empty)
 	{
 	}
 
 	Spans::Spans (const Spans& parent)
-		: m_spans (parent.m_spans)
+		: m_notes (parent.m_notes)
 	{
 	}
 
 	size_t Spans::Size () const
 	{
-		return m_spans.size();
+		return m_notes.size();
 	}
 
-	const size_t& Spans::operator [] (size_t i) const
+	const Note& Spans::operator [] (size_t i) const
 	{
-		const size_t* result{ &Invalid };
+		static const Note invalid{ Invalid };
+		const Note* result{ &invalid };
 		if (i < Size()) {
-			result = &m_spans[i];
+			result = &m_notes[i];
 		} else {
 			cout << "\nInternal Error!\n";
 			// this should rather throw
@@ -78,16 +118,17 @@ namespace Dodekafon {
 		return *result;
 	}
 
-	size_t& Spans::operator [] (size_t  i)
+	Note& Spans::operator [] (size_t  i)
 	{
-		static auto myInvalid = Empty;
-		if (myInvalid != Invalid) {
+		static const Note invalid{ Empty };
+		static Note myInvalid{ Empty };
+		if (myInvalid.Pitch() != invalid.Pitch()) {
 			myInvalid = Invalid;
 		//	cout << setw(80) << "This should happen only once!\n";
 		}
-		size_t* result{ &myInvalid };
+		Note* result{ &myInvalid };
 		if (i < Size()) {
-			result = &m_spans[i];
+			result = &m_notes[i];
 		} else {
 			cout << "\nInternal Error!\n";
 			// this should rather throw
@@ -105,9 +146,9 @@ namespace Dodekafon {
 			for (size_t i = 0; i < sRef.Size(); ++i) {
 		//		DebugPrint(setw(16), " ", "sRef[", setw(2), i, "] = ", setw(20), sRef[i]);
 
-				if (sRef[i] == Empty || sRef[i] == Endpoint) {
+				if (sRef[i].Pitch() == Empty || sRef[i].Pitch() == Endpoint) {
 					if (i >= n) {
-						if (sRef[i - n] == Empty) {
+						if (sRef[i - n].Pitch() == Empty) {
 							Spans ls(sRef);
 							ls[i] = i - n;
 							ls[i - n] = Endpoint;
@@ -123,7 +164,7 @@ namespace Dodekafon {
 						}
 					}
 					if (i + n < sRef.Size()) {
-						if (sRef[i + n] == Empty) {
+						if (sRef[i + n].Pitch() == Empty) {
 							Spans ls(sRef);
 							ls[i] = i + n;
 							ls[i + n] = Endpoint;
@@ -149,7 +190,7 @@ namespace Dodekafon {
 		for (size_t first = 0; first < spanPar.Size(); ++first) {
 			result = first;
 			for (size_t i = 0; i < spanPar.Size(); ++i) {
-				if (spanPar[i] == first) {
+				if (spanPar[i].Pitch() == first) {
 					result = Invalid;
 					break;
 				}
@@ -175,7 +216,7 @@ namespace Dodekafon {
 			 nextIndex != Invalid;
 			 ++i) {
 			result[i] = nextIndex;
-			nextIndex = spanPar[nextIndex];
+			nextIndex = spanPar[nextIndex].Pitch();
 		}
 		return result;
 	}
@@ -188,12 +229,9 @@ namespace Dodekafon {
 		Spans result(spanPar.Size ());
 		const size_t Complement = spanPar.Size() - 1;
 		for (size_t i = 0;
-			 i < result.Size() &&
-			 spanPar[i] != Endpoint &&
-			 spanPar[i] != Empty &&
-			 spanPar[i] != Invalid;
+			 i < result.Size();
 			 ++i) {
-			result[i] = Complement - spanPar[i];
+			result[i].Pitch (Complement - spanPar[i].Pitch());
 		}
 		return result;
 	}
@@ -206,10 +244,7 @@ namespace Dodekafon {
 		Spans result(spanPar.Size ());
 		const size_t Complement = spanPar.Size() - 1;
 		for (size_t i = 0;
-			 i < result.Size() &&
-			 spanPar[i] != Endpoint &&
-			 spanPar[i] != Empty &&
-			 spanPar[i] != Invalid;
+			 i < result.Size();
 			 ++i) {
 			result[i] = spanPar[Complement - i];
 		}
@@ -224,12 +259,9 @@ namespace Dodekafon {
 		Spans result(spanPar.Size ());
 		const size_t Complement = spanPar.Size() - 1;
 		for (size_t i = 0;
-			 i < result.Size() &&
-			 spanPar[i] != Endpoint &&
-			 spanPar[i] != Empty &&
-			 spanPar[i] != Invalid;
+			 i < result.Size();
 			 ++i) {
-			result[i] = Complement - spanPar[Complement - i];
+			result[i] = Complement - spanPar[Complement - i].Pitch();
 		}
 		return result;
 	}
@@ -259,15 +291,7 @@ namespace Dodekafon {
 			for (auto rsi : rsi4) {
 				cout << n << "." << ++v << " series: ";
 				for (size_t i = 0; i < rsi.Size(); ++i) {
-					auto ival = rsi[i];
-					switch (ival) {
-						case Empty:		cout << " Empty, ";		break;
-						case Endpoint:	cout << " Endpoint, ";	break;
-						case Invalid:	cout << " Invalid, ";	break;
-						default:
-							cout << setw(3) << ival + 1 << ", ";
-							break;
-					}
+					cout << setw(3) << rsi[i].Pitch() + 1 << ", ";
 				}
 				cout << endl;
 			}
