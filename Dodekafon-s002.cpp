@@ -16,8 +16,7 @@ using std::setw;
 using std::vector;
 
 const size_t				SpanWidth{ 12 };
-//const size_t				Interval{ /* SpanWidth - */ 1 };	// Upward
-const size_t				FirstIntervalLength{ SpanWidth - 1 };		// Downward
+const size_t				Interval{ /* SpanWidth - */ 1 };
 
 
 template<typename...Rest>
@@ -112,12 +111,7 @@ namespace Dodekafon {
 							ls[i] = i - n;
 							ls[i - n] = Endpoint;
 		//					DebugPrint(setw(16), " ", "sRef[", setw(2), i, "] = ", setw(20), sRef[i]);
-
-							//SolveDodekafon (n + 1,		// Upward
-							//				ls,
-							//				result);
-
-							SolveDodekafon (n - 1,			// Downward
+							SolveDodekafon (n + 1,
 											ls,
 											result);
 						}
@@ -128,10 +122,7 @@ namespace Dodekafon {
 							ls[i] = i + n;
 							ls[i + n] = Endpoint;
 		//					DebugPrint(setw(16), " ", "sRef[", setw(2), i, "] = ", setw(20), sRef[i]);
-							//SolveDodekafon (n + 1,		// Upward
-							//				ls,
-							//				result);
-							SolveDodekafon (n - 1,			// Downward
+							SolveDodekafon (n + 1,
 											ls,
 											result);
 						}
@@ -162,7 +153,7 @@ namespace Dodekafon {
 	}
 
 	//
-	// Converting to time based representation of the notes
+	//
 	//
 	const Spans RearrangeSpans(const Spans& spanPar)
 	{
@@ -198,9 +189,6 @@ namespace Dodekafon {
 		return result;
 	}
 
-	//
-	// Rak (Crab in Hungarian)
-	//
 	const Spans GenerateRetrograde(const Spans& spanPar)
 	{
 		Spans result(spanPar.Size ());
@@ -216,9 +204,6 @@ namespace Dodekafon {
 		return result;
 	}
 
-	//
-	// Rak Tukre (Mirror of Crab in Hungarian)
-	//
 	const Spans GenerateRetrogradeInversion(const Spans& spanPar)
 	{
 		Spans result(spanPar.Size ());
@@ -282,7 +267,7 @@ int main ()
 	Dodekafon::Spans            spans(SpanWidth);
 	vector<Dodekafon::Spans>    result;
 
-	SolveDodekafon (FirstIntervalLength,
+	SolveDodekafon (Interval,
 					spans,
 					result);
 

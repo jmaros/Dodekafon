@@ -6,16 +6,34 @@ Dodekafon 1 --> 12
 
 C:\Users\janos\source\repos\Dodekafon\x64\Debug\Dodekafon.exe (process 9052) exited with code 0.
 
-------------- 1.Eredeti 2.Megfordítás 3.rák 4.Megfordítás rákja -------------
+------------- 1.Eredeti 2.Megfordítás 3.rák 4.Megfordítás rákja, 1-tol novekvo(+) hangkozokkel -------------
  
  Dodekafon 1 --> 12
-1.1 series:   6,   7,   5,   8,   4,   9,   3,  10,   2,  11,   1,  12,
-1.2 series:   7,   6,   8,   5,   9,   4,  10,   3,  11,   2,  12,   1,
-1.3 series:  12,   1,  11,   2,  10,   3,   9,   4,   8,   5,   7,   6,
-1.4 series:   1,  12,   2,  11,   3,  10,   4,   9,   5,   8,   6,   7,
-2.1 series:   7,   6,   8,   5,   9,   4,  10,   3,  11,   2,  12,   1,
-2.2 series:   6,   7,   5,   8,   4,   9,   3,  10,   2,  11,   1,  12,
-2.3 series:   1,  12,   2,  11,   3,  10,   4,   9,   5,   8,   6,   7,
-2.4 series:  12,   1,  11,   2,  10,   3,   9,   4,   8,   5,   7,   6,
+1.1 series:   6,   7,   5,   8,   4,   9,   3,  10,   2,  11,   1,  12,			// D. 1.1+ es 2.2+, 1.4- es 2.3-
+1.2 series:   7,   6,   8,   5,   9,   4,  10,   3,  11,   2,  12,   1,			// C. 1.2+ es 2.1+, 1.3- es 2.4-
+1.3 series:  12,   1,  11,   2,  10,   3,   9,   4,   8,   5,   7,   6,			// B. 1.3+ es 2.4+, 1.2- es 2.1-
+1.4 series:   1,  12,   2,  11,   3,  10,   4,   9,   5,   8,   6,   7,         // A. 1.4+ es 2.3+, 1.1- es 2.2-
+2.1 series:   7,   6,   8,   5,   9,   4,  10,   3,  11,   2,  12,   1,			// C. 1.2+ es 2.1+, 1.3- es 2.4-
+2.2 series:   6,   7,   5,   8,   4,   9,   3,  10,   2,  11,   1,  12,			// D. 1.1+ es 2.2+, 1.4- es 2.3-
+2.3 series:   1,  12,   2,  11,   3,  10,   4,   9,   5,   8,   6,   7,         // A. 1.4+ es 2.3+, 1.1- es 2.2-
+2.4 series:  12,   1,  11,   2,  10,   3,   9,   4,   8,   5,   7,   6,			// B. 1.3+ es 2.4+, 1.2- es 2.1-
 
 C:\Users\janos\source\repos\Dodekafon\x64\Debug\Dodekafon.exe (process 20616) exited with code 0.
+
+------------- 1.Eredeti 2.Megfordítás 3.rák 4.Megfordítás rákja, 11-tol csokkeno(-) hangkozokkel -------------
+
+Dodekafon 1 --> 12
+1.1 series:   1,  12,   2,  11,   3,  10,   4,   9,   5,   8,   6,   7,         // A. 1.4+ es 2.3+, 1.1- es 2.2-
+1.2 series:  12,   1,  11,   2,  10,   3,   9,   4,   8,   5,   7,   6,			// B. 1.3+ es 2.4+, 1.2- es 2.1-
+1.3 series:   7,   6,   8,   5,   9,   4,  10,   3,  11,   2,  12,   1,			// C. 1.2+ es 2.1+, 1.3- es 2.4-
+1.4 series:   6,   7,   5,   8,   4,   9,   3,  10,   2,  11,   1,  12,			// D. 1.1+ es 2.2+, 1.4- es 2.3-
+2.1 series:  12,   1,  11,   2,  10,   3,   9,   4,   8,   5,   7,   6,			// B. 1.3+ es 2.4+, 1.2- es 2.1-
+2.2 series:   1,  12,   2,  11,   3,  10,   4,   9,   5,   8,   6,   7,         // A. 1.4+ es 2.3+, 1.1- es 2.2-
+2.3 series:   6,   7,   5,   8,   4,   9,   3,  10,   2,  11,   1,  12,			// D. 1.1+ es 2.2+, 1.4- es 2.3-
+2.4 series:   7,   6,   8,   5,   9,   4,  10,   3,  11,   2,  12,   1,			// C. 1.2+ es 2.1+, 1.3- es 2.4-
+
+C:\Users\janos\source\repos\Dodekafon\x64\Debug\Dodekafon.exe (process 31764) exited with code 0.
+Press any key to close this window . . .
+
+   3,  10,   2,  11,   1,  12,  6,   7,   5,   8,   4,   9, 
+      7,   8,   9,  10,  11,   6,  1,   2,   3,   4,   5, 
