@@ -16,8 +16,8 @@ using std::setw;
 using std::vector;
 
 const size_t				SpanWidth{ 12 };
-//const size_t				Interval{ /* SpanWidth - */ 1 };	// Upward
-const size_t				FirstIntervalLength{ SpanWidth - 1 };		// Downward
+const size_t				FirstIntervalLength{ 1 };					// Upward
+//const size_t				FirstIntervalLength{ SpanWidth - 1 };		// Downward
 
 
 template<typename...Rest>
@@ -113,13 +113,13 @@ namespace Dodekafon {
 							ls[i - n] = Endpoint;
 		//					DebugPrint(setw(16), " ", "sRef[", setw(2), i, "] = ", setw(20), sRef[i]);
 
-							//SolveDodekafon (n + 1,		// Upward
-							//				ls,
-							//				result);
-
-							SolveDodekafon (n - 1,			// Downward
+							SolveDodekafon (n + 1,			// Upward
 											ls,
 											result);
+
+						//	SolveDodekafon (n - 1,			// Downward
+						//					ls,
+						//					result);
 						}
 					}
 					if (i + n < sRef.Size()) {
@@ -128,12 +128,12 @@ namespace Dodekafon {
 							ls[i] = i + n;
 							ls[i + n] = Endpoint;
 		//					DebugPrint(setw(16), " ", "sRef[", setw(2), i, "] = ", setw(20), sRef[i]);
-							//SolveDodekafon (n + 1,		// Upward
-							//				ls,
-							//				result);
-							SolveDodekafon (n - 1,			// Downward
+							SolveDodekafon (n + 1,			// Upward
 											ls,
 											result);
+						//	SolveDodekafon (n - 1,			// Downward
+						//					ls,
+						//					result);
 						}
 					}
 				}
