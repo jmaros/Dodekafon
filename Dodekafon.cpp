@@ -141,10 +141,8 @@ namespace Dodekafon {
 						 vector<Spans>&  result)
 	{
 		if (n > 0 && n < SpanWidth) {
-		//	DebugLine (", Interval = ", n);
 
 			for (size_t i = 0; i < sRef.Size(); ++i) {
-		//		DebugPrint(setw(16), " ", "sRef[", setw(2), i, "] = ", setw(20), sRef[i]);
 
 				if (sRef[i].Pitch() == Empty || sRef[i].Pitch() == Endpoint) {
 					if (i >= n) {
@@ -152,7 +150,7 @@ namespace Dodekafon {
 							Spans ls(sRef);
 							ls[i] = i - n;
 							ls[i - n] = Endpoint;
-		//					DebugPrint(setw(16), " ", "sRef[", setw(2), i, "] = ", setw(20), sRef[i]);
+							//DebugLine(", Interval = ", setw(2), n, ". Pos(", setw(2), i, ") = ", setw(2), ls[i].Pitch() + 1);
 
 							SolveDodekafon (n + 1,			// Upward
 											ls,
@@ -168,7 +166,8 @@ namespace Dodekafon {
 							Spans ls(sRef);
 							ls[i] = i + n;
 							ls[i + n] = Endpoint;
-		//					DebugPrint(setw(16), " ", "sRef[", setw(2), i, "] = ", setw(20), sRef[i]);
+						//	DebugLine(", Interval = ", setw(2), n,". Pos(", setw(2), i, ") = ", setw(2), ls[i].Pitch() + 1);
+
 							SolveDodekafon (n + 1,			// Upward
 											ls,
 											result);
