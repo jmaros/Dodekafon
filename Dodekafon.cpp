@@ -589,17 +589,6 @@ namespace Dodekafon {
 	}
 
 	// Pitches operators
-//	bool Pitches::operator < (const Pitches& pitchesRight) const
-//	{
-//		return m_pitches < pitchesRight.m_pitches;
-//	}
-//
-//	bool Pitches::operator == (const Pitches& pitchesRight) const
-//	{
-//		return m_pitches == pitchesRight.m_pitches;
-//	}
-
-	// Pitches operators
 	bool operator < (const Pitches& pitchesLeft, const Pitches& pitchesRight)
 	{
 		return pitchesLeft.m_pitches < pitchesRight.m_pitches;

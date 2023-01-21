@@ -102,10 +102,6 @@ namespace Dodekafon {
 		bool SetPitch (size_t i,
 					   size_t pitchPar);
 
-	//operators
-	//	bool operator < (const Pitches& pitchesRight) const;
-	//	bool operator == (const Pitches& pitchesRight) const;
-
 	//transformations
 		Pitches			GenerateInversion()				const;
 		Pitches			GenerateRetrograde()			const;
@@ -126,9 +122,9 @@ namespace Dodekafon {
 		bool operator == (const Pitches& pitchesLeft,
 						  const Pitches& pitchesRight);
 
-	// Why cant find this:
-	//  3, 10, 2, 11, 1, 12, 6, 7, 5, 8, 4, 9,
-	//	  7, 8, 9, 10, 11, 6, 1, 2, 3, 4, 5,
+	// Why cant find e. g. this:
+	//   3,  10,  2, 11,  1,  12,   6,  7,   5,  8,    4,  9,
+	//	    7    8  9   10  11    6    1   2    3    4    5
 	// Internal:
 	//  2, 9, 1, 10, 0, 11, 5, 6, 4, 7, 3, 8,
 
