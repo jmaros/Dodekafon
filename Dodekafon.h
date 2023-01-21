@@ -123,10 +123,10 @@ namespace Dodekafon {
 						  const Pitches& pitchesRight);
 
 	// Why cant find e. g. this:
-	//   3,  10,  2, 11,  1,  12,   6,  7,   5,  8,    4,  9,
+	//   3,  10,  2, 11,  1,  12,   6,  7,   5,  8,    4,  9
 	//	    7    8  9   10  11    6    1   2    3    4    5
 	// Internal:
-	//  2, 9, 1, 10, 0, 11, 5, 6, 4, 7, 3, 8,
+	//  2, 9, 1, 10, 0, 11, 5, 6, 4, 7, 3, 8
 
 	class Spans {
 		vector<Node>		m_nodes;
@@ -157,7 +157,8 @@ namespace Dodekafon {
 		bool	AddInterval (size_t		intervalLength,
 							 size_t		lowerPich);
 	//utilities
-		vector<Pitches>	GenerateVariations ()	const;
+		vector<Pitches>	GenerateVariations ()		const;
+		bool			CopyValidSpan(Spans& ls)	const;
 	};
 
 

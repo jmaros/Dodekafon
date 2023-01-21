@@ -461,59 +461,18 @@ namespace Dodekafon {
 					}
 				}
 			}
-
-		}
-
-		if (success) {
-			//DebugLine(", Added Interval = ",
-			//		  setw(2), intervalLength, ". Pos(",
-			//		  setw(2), intervalLength, ") = ",
-			//		  setw(2), GetNode(intervalLength).Pitch() + 1);
-		} else {
-			//DebugLine(", Rejected Interval = ",
-			//		  setw(2), intervalLength, ". Pos(",
-			//		  setw(2), intervalLength, ") = ",
-			//		  setw(2), GetNode(intervalLength).Pitch() + 1);
-		}
-
-		return success;
-	}
-
-	bool CopyValidSpan(const Spans&		sRef,
-					   Spans&			ls)
-	{
-		bool success{ sRef.IsValidSpan() };
-		if (success) {
-			ls = sRef;
 		}
 		return success;
 	}
 
-	void SolveDodekafon (size_t          intervalWidth,
-						 const Spans&    sRef,
-						 vector<Spans>&  result)
+	bool Spans::CopyValidSpan(Spans&			lsParam) const
 	{
-		if (intervalWidth > 0) {
-
-			for (size_t i = 1; i + intervalWidth < sRef.NodesSize(); ++i) {
-				// Create a copy for each possible tree branch
-				Spans ls(sRef);
-				// Try to add the actual interval to the spans registry
-				if (ls.AddInterval(intervalWidth, i)) {
-					// Recurse on success with one shorter interval
-					SolveDodekafon (intervalWidth - 1,		// recursion, Downward
-									ls,
-									result);
-				}
-
-			}
-		} else {
-			// If we managed to get here than we have a possible new resulting span
-			Spans ls(sRef.SpanSize());
-			if (CopyValidSpan(sRef, ls)) {
-				result.push_back(ls);
-			}
+		bool success{};
+		if (IsValidSpan()) {
+			lsParam = *this;
+			success = true;
 		}
+		return success;
 	}
 
 	//
@@ -706,6 +665,46 @@ namespace Dodekafon {
 			cout << endl;
 		}
 	}
+
+	//
+	// Recursive algorithm to solve the problem
+	//
+	void SolveDodekafon (size_t			intervalWidth,
+						 const Spans& sRef,
+						 vector<Spans>& result)
+	{
+		if (intervalWidth > 0) {
+
+			for (size_t i = 1; i + intervalWidth < sRef.NodesSize(); ++i) {
+				// Create a copy for each possible tree branch
+				Spans ls(sRef);
+				// Try to add the actual interval to the spans registry
+				if (ls.AddInterval(intervalWidth, i)) {
+					// Recurse on success with one shorter interval
+					SolveDodekafon (intervalWidth - 1,		// recursion, Downward
+									ls,
+									result);
+				} else {
+					if (intervalWidth == 6) {
+						DebugLine(", Rejected Interval = ",
+								  setw(2), intervalWidth, ". Pos(",
+								  setw(2), i, ") = ",
+								  setw(2), ls.GetNode(i).GetPitch(), "; Pos(",
+								  setw(2), i + intervalWidth, ") = ",
+								  setw(2), ls.GetNode(i + intervalWidth).GetPitch());
+					}
+				}
+
+			}
+		} else {
+			// If we managed to get here than we have a possible new resulting span
+			Spans ls(sRef.SpanSize());
+			if (sRef.CopyValidSpan(ls)) {
+				result.push_back(ls);
+			}
+		}
+	}
+
 }
 
 using namespace Dodekafon;
