@@ -21,12 +21,18 @@
     <ClCompile Include="DebugPrint.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="SimpleDodekafonV1.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DebugPrint.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Dodekafon.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SimpleDodekafonV1.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

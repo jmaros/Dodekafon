@@ -12,6 +12,8 @@
 #include "Dodekafon.h"
 #include "DebugPrint.h"
 
+#include "SimpleDodekafonV1.h"
+
 using std::cout;
 using std::endl;
 using std::setw;
@@ -479,7 +481,7 @@ namespace Dodekafon {
 		return success;
 	}
 
-	bool CopyValidSpan(const Spans&		sRef,
+	bool CopyValidSpan(const Spans&		sRef, 
 					   Spans&			ls)
 	{
 		bool success{ sRef.IsValidSpan() };
@@ -711,7 +713,7 @@ namespace Dodekafon {
 using namespace Dodekafon;
 /// @brief  This is the main entry point of a C or C++ program
 /// @return The return value is an integer, automatically provided as 0, when the extlicit return is omitterd
-int main ()
+int mainSolveDodekafon()
 {
 	Spans			     spans(SpanWidth);
 	std::vector<Spans>    result;
@@ -728,4 +730,11 @@ int main ()
 	catch (...) {
 		cout << "Unexpected error occured!" << endl;
 	}
+	return result.size();
+}
+
+int main()
+{
+	//mainSolveDodekafon();
+	SimpleDodekafonV1();
 }
