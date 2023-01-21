@@ -144,6 +144,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DebugPrint.h" />
+    <ClInclude Include="Dodekafon.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Dodeka-Notes.txt" />

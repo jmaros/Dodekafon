@@ -1,24 +1,21 @@
 // Dodekafon.cpp
 
-// g++ -std=c++20 -O2 -Wc++20-compat -Wall -Wpedantic -time Dodekafon.cpp -o Dodekafon.exe ; .\Dodekafon.exe
-// g++ -std=c++20 -g3 -Wc++20-compat -Wall -Wpedantic -time Dodekafon.cpp -o Dodekafon.exe ; gdb .\Dodekafon.exe
+// g++ -std=c++20 -O2 -Wc++20-compat -Wall -Wpedantic -time Dodekafon.cpp DebugPrint.cpp -o Dodekafon.exe ; .\Dodekafon.exe
+// g++ -std=c++20 -g3 -Wc++20-compat -Wall -Wpedantic -time Dodekafon.cpp DebugPrint.cpp -o Dodekafon.exe ; gdb .\Dodekafon.exe
 
 #include <iomanip>
 #include <iostream>
 #include <limits>
-#include <vector>
+#include <set>
+#include <string>
 
+#include "Dodekafon.h"
 #include "DebugPrint.h"
 
 using std::cout;
 using std::endl;
 using std::setw;
-using std::vector;
-
-const size_t				SpanWidth{ 12 };
-const size_t				FirstIntervalLength{ 1 };					// Upward
-//const size_t				FirstIntervalLength{ SpanWidth - 1 };		// Downward
-
+using std::string;
 
 template<typename...Rest>
 void DebugLine (Rest const&...	rest)
@@ -29,88 +26,260 @@ void DebugLine (Rest const&...	rest)
 
 
 namespace Dodekafon {
+	//
+	// Node constructors
+	//
+	Node::Node() {}
+	Node::Node(size_t note)
+		: m_pitch(note)
+		, m_status(PitchStatus::Invalid)
+	{
+	}
 
-	const size_t Empty = std::numeric_limits<size_t>::min();
-	const size_t Invalid = std::numeric_limits<size_t>::max() - 1;
-	const size_t Endpoint = std::numeric_limits<size_t>::max() - 2;
+	Node::Node (size_t			note,
+				PitchStatus		status)
+		: m_pitch	(note)
+		, m_status	(status)
+	{
+	}
 
-	// The goal is to find all such series, where the elements are
-	// all the integer values of the [1,12] closed interval, and the absolut values
-	// of the differences are all the elements of the [1, 11] closed interval, are representing all the 11 spans.
+	//
+	// Node accessors
+	//
+	inline size_t	Node::GetPitch ()	const
+	{
+		return	m_pitch;
+	}
 
-	class Note {
-		size_t			m_pitch{};	// Integer 1..12 representing the pitch, 0 denotes the emptyness
-		int32_t			m_prev{};	// Integer -11..+11 representing the previous interval
-		int32_t			m_next{};	// Integer -11..+11 representing the next interval
-	public:
-	//constructors
-		Note() {}
-		Note(size_t note)
-			:	m_pitch(note)
-		{
+	inline size_t	Node::GetInterval (size_t	i)	const
+	{
+		return	i < m_intervals.size() ? m_intervals[i] : 0;
+	}
+
+	inline size_t	Node::GetNumIntervals ()	const
+	{
+		return	m_intervals.size();
+	}
+
+	inline PitchStatus	Node::GetPitchStatus ()	const
+	{
+		return	m_status;
+	}
+
+	bool		Node::IsEmpty ()				const
+	{
+		return	m_pitch == 0 &&
+			m_intervals.size() == 0 &&
+			GetPitchStatus() == PitchStatus::Empty;
+	}
+
+	bool		Node::IsAvailableForIntervalAddition ()	const
+	{
+		return	(m_intervals.size() < 2) &&
+			GetPitchStatus() != PitchStatus::ValidMidpoint;
+	}
+
+	bool		Node::IsLeafPoint ()	const
+	{
+		return	(m_intervals.size() == 1) &&
+			GetPitchStatus() == PitchStatus::ValidLeafpoint;
+	}
+
+	bool		Node::IsMidPoint ()	const
+	{
+		return	(m_intervals.size() == 2) &&
+			GetPitchStatus() == PitchStatus::ValidMidpoint;
+	}
+
+	size_t		Node::GetNextInterval(size_t prevInterval) const
+	{
+		size_t retv{};
+		if (IsLeafPoint()) {
+			if (prevInterval == 0) {
+				retv = GetInterval(0);
+			}
+		} else {
+			if (IsMidPoint()) {
+				if (prevInterval != 0) {
+					retv = GetInterval(0);
+					if (retv == prevInterval) {
+						retv = GetInterval(1);
+					} else {
+						if (GetInterval(1) != prevInterval) {
+							// one of the intervals must be the same as the prevInterval
+							retv = 0;
+						}
+					}
+				}
+			}
 		}
+		return retv;
+	}
 
-		size_t	Pitch() const
-		{
-			return	m_pitch;
+	//
+	// Node modifiers
+	//
+	inline void	Node::SetPitch (size_t		newPitch)
+	{
+		m_pitch = newPitch;
+	}
+
+	inline void	Node::SetPitchStatus (PitchStatus newPitchStatus)
+	{
+		m_status = newPitchStatus;
+	}
+
+	bool	Node::AddInterval (size_t		newInterval)
+	{
+		bool success = false;
+		if (IsAvailableForIntervalAddition()) {
+			m_intervals.push_back(newInterval);
+			if (m_intervals.size() == 1) {
+				SetPitchStatus(PitchStatus::ValidLeafpoint);
+				success = true;
+			} else {
+				if (m_intervals.size() == 2) {
+					SetPitchStatus(PitchStatus::ValidMidpoint);
+					success = true;
+				} else {
+					SetPitchStatus(PitchStatus::Invalid);
+				}
+			}
 		}
+		return success;
+	}
 
-		void	Pitch(size_t newPitch)
-		{
-			m_pitch = newPitch;
+	bool	Node::InitLeafNode (size_t	width,
+								size_t	pitch)
+	{
+		bool success{ IsEmpty() };
+
+		if (success) {
+			SetPitch(pitch);
+			success = AddInterval (width);
 		}
+		return success;
+	}
 
-	};
+	bool	Node::InitMiddleNode	(size_t width,
+									 size_t pitch)
+	{
+		bool success{
+			IsLeafPoint() &&
+			m_intervals[0] != width &&
+			GetPitch() == pitch
+		};
 
-	class Interval {
-		size_t			m_width{};	// Integer 0..11 representing the pitch difference, 0 denotes the emptyness
-		size_t			m_prev{};	// Integer 0..12 representing the previous pitch, 0 denotes the emptyness
-		size_t			m_next{};	// Integer 0..12 representing the next pitch, 0 denotes the emptyness
-	public:
-	//constructors
-		Interval() {}
-	};
+		if (success) {
+			if (AddInterval(width)) {
+				SetPitchStatus (PitchStatus::ValidMidpoint);
+			} else {
+				SetPitchStatus (PitchStatus::Invalid);
+			}
+		}
+		return success;
+	}
 
-	// Why cant find this:
-	//  3, 10, 2, 11, 1, 12, 6, 7, 5, 8, 4, 9,
-	//	  7, 8, 9, 10, 11, 6, 1, 2, 3, 4, 5,
-	// Internal:
-	//  2, 9, 1, 10, 0, 11, 5, 6, 4, 7, 3, 8,
+	//
+	// Interval accessors
+	//
+	bool	Interval::IsEmpty () const
+	{
+		return	m_pitches.empty();
+	}
 
-	class Spans {
-		vector<Note>    m_notes;
-	public:
-	//constructors
-		Spans (size_t n);
-		Spans (const Spans& parent);
+	size_t	Interval::GetWidth () const
+	{
+		return	m_width;
+	}
 
-		size_t Size () const;
+	// GetPitch (size_t	index) --> size_t
+	// return the indexth connegting pitch
+	// Valid "index" can be 0 or 1, since each
+	// interval is supposed to be used only once
+	size_t	Interval::GetPitch (size_t	index) const
+	{
+		size_t result{};
 
-		const Note& operator [] (size_t i) const;
-		Note& operator [] (size_t i);
-	};
+		if (index < 2 && index < m_pitches.size()) {
+			result = m_pitches[index];
+		}
+		return	result;
+	}
 
+	size_t	Interval::GetNextPitch (size_t	prevPitch) const
+	{
+		size_t	nextPitch{GetPitch(0)};
+		if (nextPitch == prevPitch) {
+			nextPitch = GetPitch(1);
+		}
+		return nextPitch;
+	}
+
+	//
+	// Interval modifiers
+	//
+	Interval& Interval::SetWidth (size_t newWidth)
+	{
+		m_width = newWidth;
+		return *this;
+	}
+
+	Interval& Interval::AddPitch (size_t newPitch)
+	{
+		if (m_pitches.size() < 2) {
+			m_pitches.push_back(newPitch);
+		}
+		return *this;
+	}
+
+	void	Interval::Init	(size_t		width,
+							 size_t		lower)
+	{
+		SetWidth(width);
+		AddPitch(lower);
+		AddPitch(width + lower);
+	}
+
+	//
+	// Spans constructors
+	//
 	Spans::Spans (size_t n)
-		: m_notes (n, Empty)
+		: m_nodes(n + 1, Node{0, PitchStatus::Empty})
+		, m_intervals{ n, Interval{} }
 	{
 	}
 
 	Spans::Spans (const Spans& parent)
-		: m_notes (parent.m_notes)
+		: m_nodes{ parent.m_nodes }
+		, m_intervals{ parent.m_intervals }
 	{
 	}
 
-	size_t Spans::Size () const
+	//
+	// Spans accessors
+	//
+	size_t	Spans::NodesSize () const
 	{
-		return m_notes.size();
+		return m_nodes.size();
 	}
 
-	const Note& Spans::operator [] (size_t i) const
+	size_t	Spans::IntervalsSize () const
 	{
-		static const Note invalid{ Invalid };
-		const Note* result{ &invalid };
-		if (i < Size()) {
-			result = &m_notes[i];
+		return m_intervals.size();
+	}
+
+	size_t	Spans::SpanSize () const
+	{
+		return IntervalsSize();
+	}
+
+	const Node& Spans::GetNode (size_t i) const
+	{
+		static const Node invalid{ 0, PitchStatus::Invalid };
+		const Node* result{ &invalid };
+		if (i > 0 && i < m_nodes.size()) {
+			result = &m_nodes[i];
 		} else {
 			cout << "\nInternal Error!\n";
 			// this should rather throw
@@ -118,17 +287,12 @@ namespace Dodekafon {
 		return *result;
 	}
 
-	Note& Spans::operator [] (size_t  i)
+	const Interval& Spans::GetInterval (size_t i) const
 	{
-		static const Note invalid{ Empty };
-		static Note myInvalid{ Empty };
-		if (myInvalid.Pitch() != invalid.Pitch()) {
-			myInvalid = Invalid;
-		//	cout << setw(80) << "This should happen only once!\n";
-		}
-		Note* result{ &myInvalid };
-		if (i < Size()) {
-			result = &m_notes[i];
+		static const Interval empty;
+		const Interval* result{ &empty };
+		if (i > 0 && i < m_intervals.size()) {
+			result = &m_intervals[i];
 		} else {
 			cout << "\nInternal Error!\n";
 			// this should rather throw
@@ -136,142 +300,372 @@ namespace Dodekafon {
 		return *result;
 	}
 
-	void SolveDodekafon (size_t          n,
-						 const Spans&    sRef,
-						 vector<Spans>&  result)
+	Node	Spans::FindFirstNode () const
 	{
-		if (n > 0 && n < SpanWidth) {
-
-			for (size_t i = 0; i < sRef.Size(); ++i) {
-
-				if (sRef[i].Pitch() == Empty || sRef[i].Pitch() == Endpoint) {
-					if (i >= n) {
-						if (sRef[i - n].Pitch() == Empty) {
-							Spans ls(sRef);
-							ls[i] = i - n;
-							ls[i - n] = Endpoint;
-							//DebugLine(", Interval = ", setw(2), n, ". Pos(", setw(2), i, ") = ", setw(2), ls[i].Pitch() + 1);
-
-							SolveDodekafon (n + 1,			// Upward
-											ls,
-											result);
-
-						//	SolveDodekafon (n - 1,			// Downward
-						//					ls,
-						//					result);
-						}
-					}
-					if (i + n < sRef.Size()) {
-						if (sRef[i + n].Pitch() == Empty) {
-							Spans ls(sRef);
-							ls[i] = i + n;
-							ls[i + n] = Endpoint;
-						//	DebugLine(", Interval = ", setw(2), n,". Pos(", setw(2), i, ") = ", setw(2), ls[i].Pitch() + 1);
-
-							SolveDodekafon (n + 1,			// Upward
-											ls,
-											result);
-						//	SolveDodekafon (n - 1,			// Downward
-						//					ls,
-						//					result);
-						}
-					}
-				}
+		Node	result{ 0, PitchStatus::Invalid };
+		for (size_t i = 1; i < NodesSize(); ++i) {
+			if (GetNode(i).GetPitchStatus() == PitchStatus::Empty) {
+				break;
 			}
-		} else {
-			result.push_back(sRef);
-		}
-	}
-
-	size_t	FindFirstIndex (const Spans& spanPar)
-	{
-		size_t	result = Invalid;
-		for (size_t first = 0; first < spanPar.Size(); ++first) {
-			result = first;
-			for (size_t i = 0; i < spanPar.Size(); ++i) {
-				if (spanPar[i].Pitch() == first) {
-					result = Invalid;
-					break;
-				}
-			}
-			if (result != Invalid) {
+			if (GetNode(i).GetPitchStatus() == PitchStatus::ValidLeafpoint) {
+				result = GetNode(i);
 				break;
 			}
 		}
 		return result;
 	}
 
+	Node	Spans::FindNextNode (const Node&		prevNode,
+								 const Interval&	prevInter) const
+	{
+		Node	resultingNode{ 0, PitchStatus::Invalid };
+		size_t	prevPitchIndex{ prevNode.GetPitch() };
+		size_t	pitch0000Index{ prevInter.GetPitch(0) };
+		size_t	pitch0001Index{ prevInter.GetPitch(1) };
+		size_t	nextPitchIndex{};
+
+		if (prevPitchIndex == pitch0000Index) {
+			nextPitchIndex = pitch0001Index;
+		} else if (prevPitchIndex == pitch0001Index) {
+			nextPitchIndex = pitch0000Index;
+		}
+
+		if (nextPitchIndex) {
+			resultingNode = GetNode(nextPitchIndex);
+		}
+		return resultingNode;
+	}
+
+	bool Spans::IsValidSpan () const
+	{
+		size_t	prevInterval{};
+		Node	node = FindFirstNode();
+		bool	success = node.IsLeafPoint();
+		if (success) {
+			set<size_t> nodeIndices;
+			set<size_t> intervalIndices;
+
+			size_t		nextPithchi{};
+
+			for (size_t i = 1; i < SpanSize(); ++i) {
+				auto pitchi = node.GetPitch();
+				if (nodeIndices.insert(pitchi).second == false) {
+					return false;
+				}
+				auto nexti = node.GetNextInterval(prevInterval);
+				if (nexti) {
+					if (intervalIndices.insert(nexti).second == false) {
+						return false;
+					}
+					Interval inti{ GetInterval(nexti) };
+					auto nextPitchi = inti.GetNextPitch(pitchi);
+					if (nextPitchi) {
+						node = GetNode(nextPitchi);
+					} else {
+						return false;
+					}
+					prevInterval = nexti;
+				}
+			}
+			if (success) {
+				auto pitchi = node.GetPitch();
+				if (nodeIndices.insert(pitchi).second == false) {
+					return false;
+				}
+				success = nodeIndices.size() == SpanWidth;
+				if (success) {
+					success = intervalIndices.size() == MaxIntervalLength;
+				}
+			}
+		}
+		return success;
+	}
+
+	//
+	// Spans modifiers
+	//
+	Node& Spans::NodeRef (size_t  i)
+	{
+		static const Node invalid{ 0, PitchStatus::Empty };
+		static Node myInvalid{ 0, PitchStatus::Empty };
+		if (myInvalid.GetPitchStatus() != invalid.GetPitchStatus()) {
+			myInvalid = invalid;
+			cout << setw(80) << "This should happen only once!\n";
+		}
+		Node* result{ &myInvalid };
+		if (i < NodesSize()) {
+			result = &m_nodes[i];
+		} else {
+			cout << "\nInternal Error!\n";
+			// this should rather throw
+		}
+		return *result;
+	}
+
+	Interval& Spans::IntervalRef (size_t  intervalWidth)
+	{
+		static const Interval empty;
+		static Interval myEmpty{};
+		if (!myEmpty.IsEmpty()) {
+			myEmpty = empty;
+			cout << setw(80) << "This should happen only once!\n";
+		}
+		Interval* result{ &myEmpty };
+		if (intervalWidth < IntervalsSize()) {
+			result = &m_intervals[intervalWidth];
+		} else {
+			cout << "\nInternal Error at Spans::GetIntervalRef!\n";
+			// this should rather throw
+		}
+		return *result;
+	}
+
+	bool	Spans::AddInterval (size_t		intervalLength,
+								size_t		lowerPich)
+	{
+		bool success{ false };
+		if (intervalLength > 0 && intervalLength < IntervalsSize()) {
+			// valid interval length
+
+			size_t higherPitch{ lowerPich + intervalLength };
+			if (higherPitch < NodesSize()) {
+				// valid higherPitch
+
+				Node& nlr{ NodeRef(lowerPich) };
+				Node& nhr{ NodeRef(higherPitch) };
+				Interval& ir{ IntervalRef(intervalLength) };
+
+				if (ir.IsEmpty() &&
+					nlr.IsAvailableForIntervalAddition() &&
+					nhr.IsAvailableForIntervalAddition()) {
+					// This interval can be added
+					ir.Init(intervalLength, lowerPich);
+					bool	successA{};
+					if (nlr.IsEmpty()) {
+						successA = nlr.InitLeafNode(intervalLength, lowerPich);
+					} else if (nlr.IsLeafPoint()) {
+						successA = nlr.InitMiddleNode(intervalLength, lowerPich);
+					}
+					bool	successB{};
+					if (nhr.IsEmpty()) {
+						successB = nhr.InitLeafNode(intervalLength, higherPitch);
+					} else if (nlr.IsLeafPoint()) {
+						successB = nhr.InitMiddleNode(intervalLength, higherPitch);
+					}
+					success = successA && successB;
+				}
+				if (success) {
+					if (nlr.GetPitch() != lowerPich || nhr.GetPitch() != higherPitch) {
+						cout << "\nInternal Error at Spans::AddInterval!\n";
+						// this should rather throw
+					}
+				}
+			}
+
+		}
+
+		if (success) {
+			//DebugLine(", Added Interval = ",
+			//		  setw(2), intervalLength, ". Pos(",
+			//		  setw(2), intervalLength, ") = ",
+			//		  setw(2), GetNode(intervalLength).Pitch() + 1);
+		} else {
+			//DebugLine(", Rejected Interval = ",
+			//		  setw(2), intervalLength, ". Pos(",
+			//		  setw(2), intervalLength, ") = ",
+			//		  setw(2), GetNode(intervalLength).Pitch() + 1);
+		}
+
+		return success;
+	}
+
+	bool CopyValidSpan(const Spans&		sRef,
+					   Spans&			ls)
+	{
+		bool success{ sRef.IsValidSpan() };
+		if (success) {
+			ls = sRef;
+		}
+		return success;
+	}
+
+	void SolveDodekafon (size_t          intervalWidth,
+						 const Spans&    sRef,
+						 vector<Spans>&  result)
+	{
+		if (intervalWidth > 0) {
+
+			for (size_t i = 1; i + intervalWidth < sRef.NodesSize(); ++i) {
+				// Create a copy for each possible tree branch
+				Spans ls(sRef);
+				// Try to add the actual interval to the spans registry
+				if (ls.AddInterval(intervalWidth, i)) {
+					// Recurse on success with one shorter interval
+					SolveDodekafon (intervalWidth - 1,		// recursion, Downward
+									ls,
+									result);
+				}
+
+			}
+		} else {
+			// If we managed to get here than we have a possible new resulting span
+			Spans ls(sRef.SpanSize());
+			if (CopyValidSpan(sRef, ls)) {
+				result.push_back(ls);
+			}
+		}
+	}
+
 	//
 	// Converting to time based representation of the notes
 	//
-	const Spans RearrangeSpans(const Spans& spanPar)
+	Pitches Spans::ExtractPitches() const
 	{
-		Spans result(spanPar.Size ());
-		// Find first index
-		size_t	nextIndex = FindFirstIndex (spanPar);
-		for (size_t i = 0;
-			 i < result.Size()		&&
-			 nextIndex != Endpoint	&&
-			 nextIndex != Invalid;
-			 ++i) {
-			result[i] = nextIndex;
-			nextIndex = spanPar[nextIndex].Pitch();
+		Pitches		result(SpanSize ());
+		Node		node = FindFirstNode();
+		if (node.IsLeafPoint()) {
+			size_t intervalIndex = node.GetInterval(0);
+			Interval	prevInterval = GetInterval(intervalIndex);
+			for (size_t i = 0;
+				 i < result.Size() &&
+				 node.GetPitchStatus() != PitchStatus::Invalid;
+				 ++i) {
+				result.SetPitch(i, node.GetPitch());
+				if (i > 0 && node.IsLeafPoint()) {
+					break;
+				}
+				Node		prevNode{ node };
+				node = FindNextNode(prevNode,
+									prevInterval);
+				intervalIndex = node.GetNextInterval(prevInterval.GetWidth());
+				if (intervalIndex) {
+					prevInterval = GetInterval(intervalIndex);
+				} else {
+					prevInterval = Interval();
+				}
+			}
 		}
 		return result;
 	}
+
+	//
+	// Pitches constructors
+	//
+	Pitches::Pitches ()
+		: m_pitches	(SpanWidth, 0)
+	{
+	}
+
+	Pitches::Pitches (size_t numPitches)
+		: m_pitches	(numPitches, 0)
+	{
+	}
+
+	Pitches::Pitches (const Pitches& pitchesPar)
+		: m_pitches	(pitchesPar.m_pitches)
+	{
+	}
+
+	// Pitches accessors
+	size_t Pitches::Size () const
+	{
+		return m_pitches.size();
+	}
+
+	size_t Pitches::GetPitch (size_t i) const
+	{
+		return (i < Size() ? m_pitches[i] : 0);
+	}
+
+	// Pitches modifiers
+	bool Pitches::SetPitch (size_t i,
+							size_t pitchPar)
+	{
+		bool success{ i < Size() };
+		if (success) {
+			m_pitches[i] = pitchPar;
+		}
+		return success;
+	}
+
+	// Pitches operators
+	bool Pitches::operator < (const Pitches& pitchesRight) const
+	{
+		return m_pitches < pitchesRight.m_pitches;
+	}
+
+	bool Pitches::operator == (const Pitches& pitchesRight) const
+	{
+		return m_pitches == pitchesRight.m_pitches;
+	}
+
+	// Pitches transformations
 
 	//
 	// Tukor (Mirror in Hungarian)
 	//
-	const Spans GenerateInversion(const Spans& spanPar)
+	Pitches Pitches::GenerateInversion () const
 	{
-		Spans result(spanPar.Size ());
-		const size_t Complement = spanPar.Size() - 1;
+		Pitches result(Size());
+		const size_t Complement = Size() + 1;
 		for (size_t i = 0;
 			 i < result.Size();
 			 ++i) {
-			result[i].Pitch (Complement - spanPar[i].Pitch());
+			result.SetPitch(i, Complement - GetPitch(i));
 		}
 		return result;
 	}
 
 	//
-	// Rak (Crab in Hungarian)
+	// Crab
 	//
-	const Spans GenerateRetrograde(const Spans& spanPar)
+	Pitches Pitches::GenerateRetrograde () const
 	{
-		Spans result(spanPar.Size ());
-		const size_t Complement = spanPar.Size() - 1;
+		Pitches result(Size ());
+		const size_t Maxi = Size() - 1;
 		for (size_t i = 0;
 			 i < result.Size();
 			 ++i) {
-			result[i] = spanPar[Complement - i];
+			result.SetPitch(i, GetPitch(Maxi - i));
 		}
 		return result;
 	}
 
 	//
-	// Rak Tukre (Mirror of Crab in Hungarian)
+	// Mirror of Crab
 	//
-	const Spans GenerateRetrogradeInversion(const Spans& spanPar)
+	Pitches Pitches::GenerateRetrogradeInversion () const
 	{
-		Spans result(spanPar.Size ());
-		const size_t Complement = spanPar.Size() - 1;
-		for (size_t i = 0;
+		Pitches result(Size ());
+		const size_t Complement = Size() + 1;
+		const size_t Maxi		= Size() - 1;
+		for (size_t i = 1;
 			 i < result.Size();
 			 ++i) {
-			result[i] = Complement - spanPar[Complement - i].Pitch();
+			size_t retroPitch	= GetPitch(Maxi - i);
+			size_t newPitch		= Complement - retroPitch;
+			result.SetPitch(i, newPitch);
 		}
 		return result;
 	}
 
-	vector<Spans> GenerateVariations (const Spans&	rsin)
+	void Pitches::Dump () const
 	{
-		vector<Spans> result;
-		result.push_back(RearrangeSpans(rsin));
-		result.push_back(GenerateInversion(result[0]));				// Tuekoer
-		result.push_back(GenerateRetrograde(result[0]));			// Raak
-		result.push_back(GenerateRetrogradeInversion(result[0]));	// Tuekoer Raakja
+		string mySeparator;
+		for (size_t i = 1; i < Size(); ++i) {
+			cout << mySeparator << setw(3) << GetPitch(i);
+			mySeparator = ", ";
+		}
+	}
+
+	vector<Pitches> Spans::GenerateVariations () const
+	{
+		vector<Pitches> result;
+		const Pitches rearranged{ ExtractPitches() };
+		result.push_back(rearranged);
+		result.push_back(rearranged.GenerateInversion());			// Mirror
+		result.push_back(rearranged.GenerateRetrograde());			// Crab
+		result.push_back(rearranged.GenerateRetrogradeInversion());	// Mirror's Crab
 
 		return result;
 	}
@@ -282,35 +676,50 @@ namespace Dodekafon {
 	//
 	void PrintDodekafon (const vector<Spans>& result)
 	{
+		size_t d = 0;
 		size_t n = 0;
+		set<Pitches> sortedList;
 		for (auto rsin : result) {
-			const vector<Spans> rsi4{ GenerateVariations(rsin) };
+			const vector<Pitches> rsi4{ rsin.GenerateVariations() };
 			++n;
 			size_t v = 0;
 			for (auto rsi : rsi4) {
-				cout << n << "." << ++v << " series: ";
-				for (size_t i = 0; i < rsi.Size(); ++i) {
-					cout << setw(3) << rsi[i].Pitch() + 1 << ", ";
+				if (sortedList.insert(rsi).second) {
+					cout << " ";
+				} else {
+					++d;
+					cout << "-";
 				}
+				cout << setw(3) << n << "." << ++v << " series: ";
+				rsi.Dump();
 				cout << endl;
 			}
+		}
+		cout << endl;
+		cout << d << " duplicate eliminated out of " << 4 * n << ", remained: " << 4 * n - d << endl;
+		cout << endl;
+		size_t m = 0;
+		for (auto slm : sortedList) {
+			cout << setw(3) << ++m << ". sorted: ";
+			slm.Dump();
+			cout << endl;
 		}
 	}
 }
 
+using namespace Dodekafon;
 /// @brief  This is the main entry point of a C or C++ program
 /// @return The return value is an integer, automatically provided as 0, when the extlicit return is omitterd
 int main ()
 {
-	Dodekafon::Spans            spans(SpanWidth);
-	vector<Dodekafon::Spans>    result;
+	Spans			     spans(SpanWidth);
+	std::vector<Spans>    result;
 
-	SolveDodekafon (FirstIntervalLength,
-					spans,
-					result);
+	SolveDodekafon(MaxIntervalLength,
+				   spans,
+				   result);
 
-	cout << "Dodekafon 1 --> 12" << endl;
+	cout << "Dodekafon 1 --> " << SpanWidth << endl;
 
 	PrintDodekafon (result);
-
 }
