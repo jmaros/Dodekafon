@@ -685,13 +685,17 @@ namespace Dodekafon {
 									ls,
 									result);
 				} else {
-					if (intervalWidth == 6) {
+					const auto& nodi = ls.GetNode(i);
+					const auto& nodj = ls.GetNode(i + intervalWidth);
+					if (!nodi.IsMidPoint() && !nodj.IsMidPoint()) {
+						const auto stat1 = (nodi.IsMidPoint() ? " MiddlePoint" : "            ");
+						const auto stat2 = (nodj.IsMidPoint() ? " MiddlePoint" : "            ");
 						DebugLine(", Rejected Interval = ",
 								  setw(2), intervalWidth, ". Pos(",
 								  setw(2), i, ") = ",
-								  setw(2), ls.GetNode(i).GetPitch(), "; Pos(",
+								  setw(2), nodi.GetPitch(), stat1, "; Pos(",
 								  setw(2), i + intervalWidth, ") = ",
-								  setw(2), ls.GetNode(i + intervalWidth).GetPitch());
+								  setw(2), nodj.GetPitch(), stat2);
 					}
 				}
 
