@@ -103,15 +103,28 @@ namespace Dodekafon {
 					   size_t pitchPar);
 
 	//operators
-		bool operator < (const Pitches& pitchesRight) const;
-		bool operator == (const Pitches& pitchesRight) const;
+	//	bool operator < (const Pitches& pitchesRight) const;
+	//	bool operator == (const Pitches& pitchesRight) const;
 
 	//transformations
 		Pitches			GenerateInversion()				const;
 		Pitches			GenerateRetrograde()			const;
 		Pitches			GenerateRetrogradeInversion()	const;
 		void			Dump()							const;
+
+		friend bool operator < (const Pitches& pitchesLeft,
+								const Pitches& pitchesRight);
+
+		friend bool operator == (const Pitches& pitchesLeft,
+								 const Pitches& pitchesRight);
 	};
+
+	//global scope operators
+		bool operator < (const Pitches& pitchesLeft,
+						 const Pitches& pitchesRight);
+
+		bool operator == (const Pitches& pitchesLeft,
+						  const Pitches& pitchesRight);
 
 	// Why cant find this:
 	//  3, 10, 2, 11, 1, 12, 6, 7, 5, 8, 4, 9,

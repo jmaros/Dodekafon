@@ -589,14 +589,25 @@ namespace Dodekafon {
 	}
 
 	// Pitches operators
-	bool Pitches::operator < (const Pitches& pitchesRight) const
+//	bool Pitches::operator < (const Pitches& pitchesRight) const
+//	{
+//		return m_pitches < pitchesRight.m_pitches;
+//	}
+//
+//	bool Pitches::operator == (const Pitches& pitchesRight) const
+//	{
+//		return m_pitches == pitchesRight.m_pitches;
+//	}
+
+	// Pitches operators
+	bool operator < (const Pitches& pitchesLeft, const Pitches& pitchesRight)
 	{
-		return m_pitches < pitchesRight.m_pitches;
+		return pitchesLeft.m_pitches < pitchesRight.m_pitches;
 	}
 
-	bool Pitches::operator == (const Pitches& pitchesRight) const
+	bool operator == (const Pitches& pitchesLeft, const Pitches& pitchesRight)
 	{
-		return m_pitches == pitchesRight.m_pitches;
+		return pitchesLeft.m_pitches == pitchesRight.m_pitches;
 	}
 
 	// Pitches transformations
@@ -651,10 +662,11 @@ namespace Dodekafon {
 
 	void Pitches::Dump () const
 	{
-		string mySeparator;
-		for (size_t i = 1; i < Size(); ++i) {
-			cout << mySeparator << setw(3) << GetPitch(i);
-			mySeparator = ", ";
+		if (Size() > 0) {
+			cout << setw(3) << GetPitch(0);
+			for (size_t i = 1; i < Size(); ++i) {
+				cout << ", " << setw(3) << GetPitch(i);
+			}
 		}
 	}
 
