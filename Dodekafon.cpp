@@ -639,7 +639,7 @@ namespace Dodekafon {
 		Pitches result(Size ());
 		const size_t Complement = Size() + 1;
 		const size_t Maxi		= Size() - 1;
-		for (size_t i = 1;
+		for (size_t i = 0;
 			 i < result.Size();
 			 ++i) {
 			size_t retroPitch	= GetPitch(Maxi - i);
@@ -716,11 +716,16 @@ int main ()
 	Spans			     spans(SpanWidth);
 	std::vector<Spans>    result;
 
-	SolveDodekafon(MaxIntervalLength,
-				   spans,
-				   result);
+	try {
+		SolveDodekafon(MaxIntervalLength,
+					   spans,
+					   result);
 
-	cout << "Dodekafon 1 --> " << SpanWidth << endl;
+		cout << "Dodekafon 1 --> " << SpanWidth << endl;
 
-	PrintDodekafon (result);
+		PrintDodekafon (result);
+	}
+	catch (...) {
+		cout << "Unexpected error occured!" << endl;
+	}
 }
