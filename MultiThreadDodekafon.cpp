@@ -70,11 +70,7 @@ int SimpleDodekafonV1_MultiThread(bool listMode, std::array<DWORD, DODEKAFON_SIZ
 	DWORD tt1 = GetTickCount();
 	if (listMode) {
 		for (const DodekafonRecord& r : result) {
-<<<<<<< HEAD
 			r.OutputDebugString("Valid record -", DodekafonRecord::RecordMode);
-=======
-			r.OutputDebugString("Valid record - ", DodekafonRecord::RecordMode);
->>>>>>> 0adca89e30f7f1ff4d96df45e7f6bddb4f7667ff
 		}
 #ifdef _DEBUG_OUTPUTSTR_
 		std::string s;
