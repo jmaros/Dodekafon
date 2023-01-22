@@ -24,6 +24,12 @@
     <ClCompile Include="SimpleDodekafonV1.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="MultiThreadDodekafon.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DodekafonRecord.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DebugPrint.h">
@@ -33,6 +39,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="SimpleDodekafonV1.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MultiThreadDodekafon.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DodekafonRecord.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

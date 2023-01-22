@@ -141,11 +141,15 @@
   <ItemGroup>
     <ClCompile Include="Dodekafon.cpp" />
     <ClCompile Include="DebugPrint.cpp" />
+    <ClCompile Include="MultiThreadDodekafon.cpp" />
     <ClCompile Include="SimpleDodekafonV1.cpp" />
+    <ClCompile Include="DodekafonRecord.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DebugPrint.h" />
     <ClInclude Include="Dodekafon.h" />
+    <ClInclude Include="DodekafonRecord.h" />
+    <ClInclude Include="MultiThreadDodekafon.h" />
     <ClInclude Include="SimpleDodekafonV1.h" />
   </ItemGroup>
   <ItemGroup>
