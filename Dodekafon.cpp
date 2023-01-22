@@ -13,6 +13,7 @@
 #include "DebugPrint.h"
 
 #include "SimpleDodekafonV1.h"
+#include "MultiThreadDodekafon.h"
 
 using std::cout;
 using std::endl;
@@ -736,5 +737,6 @@ int mainSolveDodekafon()
 int main()
 {
 	//mainSolveDodekafon();
-	SimpleDodekafonV1();
+	//SimpleDodekafonV1();
+	MultiThreadDodekafonV1();
 }
