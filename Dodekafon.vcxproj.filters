@@ -21,12 +21,42 @@
     <ClCompile Include="DebugPrint.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="DodekaNode.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DodekaInterval.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DodekaPitches.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DodekaSpan.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DebugPrint.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Dodekafon.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Testdata.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DodekaNode.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DodekaInterval.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DodekaPitches.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DodekaBase.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DodekaSpan.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

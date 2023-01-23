@@ -1,5 +1,8 @@
+//
 // DebugPrint.h
+//
 #pragma once
+#include <iomanip>
 #include <iostream>
 
 void DebugPrint();
@@ -17,4 +20,19 @@ void DebugPrint(T const& t,
 {
 	std::cout << t;
 	DebugPrint(rest...);
+}
+
+template<typename...Params>
+void DebugLine (Params const&...	rest)
+{
+	static int n = 0;
+	DebugPrint("Debug line ", std::setw(3), ++n, rest...);
+}
+
+template<typename...Params>
+void DebugNewLine (Params const&...	rest)
+{
+	static int n = 0;
+	DebugLine(rest...);
+	DebugPrint("\n");
 }
