@@ -7,7 +7,7 @@ SimpleDodekafonV1.h
 #define _SIMPLEDODEKAFONV1_H_
 
 
-int SimpleDodekafonV1();
+size_t SimpleDodekafonV1();
 
 
 #endif // _SIMPLEDODEKAFONV1_H_

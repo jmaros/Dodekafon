@@ -27,7 +27,7 @@ void BasicSoundPlayer::PlayBasicSounds()
 
 void BasicSoundPlayer::PlayBasicSounds(const DodekafonRecord& r, DWORD rythmIndex)
 {
-	const std::array<int, DODEKAFON_SIZE>& record = r.GetRecord();
+	const std::array<size_t, DODEKAFON_SIZE>& record = r.GetRecord();
 	int ri = 0;
 	if (rythmIndex >= 0 && rythmIndex < GetRythmSize())
 		ri = rythmIndex;

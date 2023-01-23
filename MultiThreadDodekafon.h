@@ -7,7 +7,7 @@ MultiThreadDodekafon.h
 #define _MULTITHREADDODEKAFON_H_
 
 
-int MultiThreadDodekafonV1();
+size_t MultiThreadDodekafonV1();
 
 
 #endif // _MULTITHREADDODEKAFON_H_
