@@ -64,6 +64,7 @@ size_t SimpleDodekafonV1_MultiThread(ReportModeEnum reportMode, std::array<uint6
 	std::vector<DodekafonRecord> result;
 	ThreadData threadData[DODEKAFON_SIZE];
 
+	hTimerMutex = CreateMutexW(nullptr, FALSE, nullptr);
 	uint64_t tt0 = GetTickCount64();
 	for (std::size_t i = 0; i < DODEKAFON_SIZE; ++i) {
 		threadData[i] = ThreadData(&resultThreads[i], i + 1, tt0);
@@ -76,6 +77,8 @@ size_t SimpleDodekafonV1_MultiThread(ReportModeEnum reportMode, std::array<uint6
 		}
 		timetickArray[i] += threadData[i].timeTick;
 	}
+	if (hTimerMutex)
+		CloseHandle(hTimerMutex);
 	uint64_t tt1 = GetTickCount64();
 	if (reportMode & ReportModeEnum::ListMode) {
 		for (const DodekafonRecord& r : result) {
