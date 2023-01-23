@@ -22,6 +22,11 @@ DodekafonRecord::DodekafonRecord(std::size_t n)
 	}
 }
 
+const std::array<int, DODEKAFON_SIZE>& DodekafonRecord::GetRecord() const
+{
+	return record;
+}
+
 void DodekafonRecord::OutputDebugString(const char* strIn, DWORD mode) const
 {
 #ifdef _DEBUG_OUTPUTSTR_

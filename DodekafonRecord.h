@@ -45,6 +45,7 @@ public:
 	DodekafonRecord FindNext(DiffIteratorType& diffIterator) const;
 	bool IsNewValid(const std::vector<DodekafonRecord>& records);
 	void OutputDebugString(const char* strIn, DWORD mode = AllMode) const;
+	const std::array<int, DODEKAFON_SIZE>& GetRecord() const;
 };
 
 

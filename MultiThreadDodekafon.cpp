@@ -9,13 +9,22 @@ MultiThreadDodekafon.cpp
 #include <windows.h>
 #include <process.h>
 #include <Debugapi.h>
+#include <conio.h>
 
 #include "DodekafonRecord.h"
+
+#include "BasicSoundPlayer.h"
 
 #define MAX_THREADS  DODEKAFON_SIZE
 
 static HANDLE  hThreads[MAX_THREADS] = { NULL };
 static HANDLE  hTimerMutex;
+
+enum ReportModeEnum {
+	NoReportMode = 0,
+	ListMode = 1,
+	PlayMode = 2
+};
 
 struct ThreadData {
 	std::vector<DodekafonRecord> * resultPtr{nullptr};
@@ -49,7 +58,7 @@ void DodekafonProcess(void * dataPtr)
 }
 
 
-int SimpleDodekafonV1_MultiThread(bool listMode, std::array<DWORD, DODEKAFON_SIZE>& timetickArray)
+int SimpleDodekafonV1_MultiThread(ReportModeEnum reportMode, std::array<DWORD, DODEKAFON_SIZE>& timetickArray)
 {
 	std::vector<DodekafonRecord> resultThreads[DODEKAFON_SIZE];
 	std::vector<DodekafonRecord> result;
@@ -68,7 +77,7 @@ int SimpleDodekafonV1_MultiThread(bool listMode, std::array<DWORD, DODEKAFON_SIZ
 		timetickArray[i] += threadData[i].timeTick;
 	}
 	DWORD tt1 = GetTickCount();
-	if (listMode) {
+	if (reportMode & ReportModeEnum::ListMode) {
 		for (const DodekafonRecord& r : result) {
 			r.OutputDebugString("Valid record -", DodekafonRecord::RecordMode);
 		}
@@ -89,6 +98,23 @@ int SimpleDodekafonV1_MultiThread(bool listMode, std::array<DWORD, DODEKAFON_SIZ
 		::OutputDebugStringA(s.c_str());
 #endif
 	}
+	if (reportMode & ReportModeEnum::PlayMode) {
+		BasicSoundPlayer player;
+		player.PlayBasicSounds();
+		Sleep(1000);
+		int iRythm = 2;
+		for (const DodekafonRecord& r : result) {
+			player.PlayBasicSounds(r, iRythm);
+			++iRythm;
+			if (iRythm >= 5)
+				iRythm = 2;
+			Sleep(1000);
+			if (_kbhit()) {
+				break;
+			}
+		}
+	}
+
 	return result.size();
 }
 
@@ -100,7 +126,8 @@ int MultiThreadDodekafonV1()
 	int ret = 0;
 	const int num = 100;
 	for (int i = 0; i < num; ++i) {
-		ret = SimpleDodekafonV1_MultiThread(i == 0, timetickArray);
+		ReportModeEnum report(i == 0 ? ListMode : NoReportMode);
+		ret = SimpleDodekafonV1_MultiThread(report, timetickArray);
 	}
 	DWORD tc2 = GetTickCount();
 #ifdef _DEBUG_OUTPUTSTR_
@@ -121,6 +148,7 @@ int MultiThreadDodekafonV1()
 	s += "\n";
 	::OutputDebugStringA(s.c_str());
 #endif
+	SimpleDodekafonV1_MultiThread(PlayMode, timetickArray);
 	return ret;
 }
 
