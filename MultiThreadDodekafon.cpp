@@ -51,7 +51,7 @@ void DodekafonProcess(void * dataPtr)
 			}
 		}
 		WaitForSingleObject(hTimerMutex, INFINITE);
-		DWORD tt1 = GetTickCount();
+		uint64_t tt1 = GetTickCount64();
 		ReleaseMutex(hTimerMutex);
 		threadDataPtr->timeTick = tt1 - threadDataPtr->timeTick;
 	}
