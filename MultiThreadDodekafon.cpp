@@ -20,10 +20,10 @@ static HANDLE  hTimerMutex;
 struct ThreadData {
 	std::vector<DodekafonRecord> * resultPtr{nullptr};
 	std::size_t startValue;
-	DWORD timeTick{0};
+	uint64_t timeTick{0Ui64};
 
 	ThreadData() {};
-	ThreadData(std::vector<DodekafonRecord>* resultPtrIn, std::size_t startValueIn, DWORD timeTickIn) :
+	ThreadData(std::vector<DodekafonRecord>* resultPtrIn, std::size_t startValueIn, uint64_t timeTickIn) :
 		resultPtr(resultPtrIn),
 		startValue (startValueIn),
 		timeTick (timeTickIn)
@@ -49,13 +49,13 @@ void DodekafonProcess(void * dataPtr)
 }
 
 
-int SimpleDodekafonV1_MultiThread(bool listMode, std::array<DWORD, DODEKAFON_SIZE>& timetickArray)
+size_t SimpleDodekafonV1_MultiThread(bool listMode, std::array<uint64_t, DODEKAFON_SIZE>& timetickArray)
 {
 	std::vector<DodekafonRecord> resultThreads[DODEKAFON_SIZE];
 	std::vector<DodekafonRecord> result;
 	ThreadData threadData[DODEKAFON_SIZE];
 
-	DWORD tt0 = GetTickCount();
+	uint64_t tt0 = GetTickCount64();
 	for (std::size_t i = 0; i < DODEKAFON_SIZE; ++i) {
 		threadData[i] = ThreadData(&resultThreads[i], i + 1, tt0);
 		hThreads[i] = (HANDLE)_beginthread(DodekafonProcess, 0, (void*)(ThreadData *)&threadData[i]);
@@ -67,10 +67,10 @@ int SimpleDodekafonV1_MultiThread(bool listMode, std::array<DWORD, DODEKAFON_SIZ
 		}
 		timetickArray[i] += threadData[i].timeTick;
 	}
-	DWORD tt1 = GetTickCount();
+	uint64_t tt1 = GetTickCount64();
 	if (listMode) {
 		for (const DodekafonRecord& r : result) {
-			r.OutputDebugString("Valid record -", DodekafonRecord::RecordMode);
+			r.OutPutDebugString("Valid record -", DodekafonRecord::ODE::RecordMode);
 		}
 #ifdef _DEBUG_OUTPUTSTR_
 		std::string s;
@@ -81,7 +81,7 @@ int SimpleDodekafonV1_MultiThread(bool listMode, std::array<DWORD, DODEKAFON_SIZ
 		s += "\n";
 		::OutputDebugStringA(s.c_str());
 		s = "TimeTick:";
-		for (DWORD tt : timetickArray) {
+		for (auto tt : timetickArray) {
 			s += std::to_string(tt);
 			s += ", ";
 		}
@@ -93,16 +93,16 @@ int SimpleDodekafonV1_MultiThread(bool listMode, std::array<DWORD, DODEKAFON_SIZ
 }
 
 
-int MultiThreadDodekafonV1()
+size_t MultiThreadDodekafonV1()
 {
-	std::array<DWORD, DODEKAFON_SIZE> timetickArray{ 0 };
-	DWORD tc = GetTickCount();
-	int ret = 0;
+	std::array<uint64_t, DODEKAFON_SIZE> timetickArray{ 0 };
+	uint64_t tc = GetTickCount64();
+	size_t ret = 0;
 	const int num = 100;
 	for (int i = 0; i < num; ++i) {
 		ret = SimpleDodekafonV1_MultiThread(i == 0, timetickArray);
 	}
-	DWORD tc2 = GetTickCount();
+	uint64_t tc2 = GetTickCount64();
 #ifdef _DEBUG_OUTPUTSTR_
 
 	std::string s;
@@ -114,7 +114,7 @@ int MultiThreadDodekafonV1()
 	s += "\n";
 	::OutputDebugStringA(s.c_str());
 	s = "TimeTick:";
-	for (DWORD tt : timetickArray) {
+	for (auto tt : timetickArray) {
 		s += std::to_string(tt / num);
 		s += ", ";
 	}

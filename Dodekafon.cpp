@@ -348,8 +348,6 @@ namespace Dodekafon {
 			set<size_t> nodeIndices;
 			set<size_t> intervalIndices;
 
-			size_t		nextPithchi{};
-
 			for (size_t i = 1; i < SpanSize(); ++i) {
 				auto pitchi = node.GetPitch();
 				if (nodeIndices.insert(pitchi).second == false) {
@@ -714,7 +712,7 @@ namespace Dodekafon {
 using namespace Dodekafon;
 /// @brief  This is the main entry point of a C or C++ program
 /// @return The return value is an integer, automatically provided as 0, when the extlicit return is omitterd
-int mainSolveDodekafon()
+size_t mainSolveDodekafon()
 {
 	Spans			     spans(SpanWidth);
 	std::vector<Spans>    result;

@@ -22,25 +22,32 @@ DodekafonRecord::DodekafonRecord(std::size_t n)
 	}
 }
 
-void DodekafonRecord::OutputDebugString(const char* strIn, DWORD mode) const
+void DodekafonRecord::OutPutDebugString(const char* strIn, ODE mode) const
 {
 #ifdef _DEBUG_OUTPUTSTR_
 
 	std::string s;
 	s = strIn;
-	if (mode & LengthMode) {
+	bool extraNewLine{};
+	if (ETest(mode, ODE::LengthMode) == UnderlyingType(mode)) {
 		s += " size:";
 		s += std::to_string(length);
+		extraNewLine = true;
 	}
-	if (mode & NoMoreMode) {
+	if (ETest(mode, ODE::NoMoreMode)) {
 		s += " noMore:";
 		if (noMore)
 			s += "TRUE";
 		else
 			s += "FALSE";
+		extraNewLine = true;
 	}
-	s += "\n";
-	if (mode & RecordMode) {
+	if (extraNewLine) {
+		s += "\n";
+	} else {
+		s += " ";
+	}
+	if (ETest(mode, ODE::RecordMode)) {
 		for (int i = 0; i < length; ++i) {
 			if (i > 0)
 				s += ", ";
@@ -48,7 +55,7 @@ void DodekafonRecord::OutputDebugString(const char* strIn, DWORD mode) const
 		}
 		s += "\n";
 	}
-	if (mode & UsedValueMode) {
+	if (ETest(mode, ODE::UsedValueMode)) {
 		for (int i = 0; i < DODEKAFON_SIZE; ++i) {
 			if (usedValue[i] > 0)
 				s += std::to_string(i + 1);
@@ -56,7 +63,7 @@ void DodekafonRecord::OutputDebugString(const char* strIn, DWORD mode) const
 		}
 		s += "\n";
 	}
-	if (mode & UsedDistanceMode) {
+	if (ETest(mode, ODE::UsedDistanceMode)) {
 		for (int i = 0; i < DODEKAFON_SIZE - 1; ++i) {
 			if (usedDistance[i] > 0)
 				s += std::to_string(i + 1);
@@ -108,7 +115,7 @@ DodekafonRecord DodekafonRecord::FindNext(DiffIteratorType& diffIterator) const
 	std::size_t vNext = r.ValueNext(diffIterator);
 	if (vNext > 0) {
 		if (length > 0) {
-			std::size_t vDistance = labs(vNext - this->record[length - 1]);
+			std::size_t vDistance = Distance<size_t>(vNext, this->record[length - 1]);
 			r.usedDistance[vDistance - 1] = 1;
 		}
 		r.record[length] = vNext;
@@ -139,7 +146,7 @@ DodekafonRecord DodekafonRecord::FindNext(DiffIteratorType& diffIterator) const
 			std::size_t nn = r.record[r.length - 1];
 			r.record[r.length - 1] = 0;
 			r.usedValue[nn - 1] = 0;
-			std::size_t vDistance = labs(nn - r.record[r.length - 2]);
+			std::size_t vDistance = Distance(nn, r.record[r.length - 2]);
 			std::size_t nn2 = nn + vDistance * 2;
 			if (nn < r.record[r.length - 2] &&
 				nn2 <= DODEKAFON_SIZE &&
@@ -166,7 +173,6 @@ DodekafonRecord DodekafonRecord::FindNext(DiffIteratorType& diffIterator) const
 #endif
 
 			diffIterator = DiffIteratorType{ vDistance , false };
-			std::size_t lengthPrev = r.length;
 
 #ifdef _DEBUG_OUTPUTSTR_1_	
 			r.OutputDebugString("FindNext step back to - size:");
@@ -199,6 +205,7 @@ bool DodekafonRecord::operator == (const DodekafonRecord& r2) const
 bool DodekafonRecord::IsNewValid(const std::vector<DodekafonRecord>& records)
 {
 	if (length == DODEKAFON_SIZE) {
+		/*UNUSED_FORMAL_PARAMETER */ (records);
 		/*
 		for (const DodekafonRecord& ri : records) {
 			if (ri == *this)

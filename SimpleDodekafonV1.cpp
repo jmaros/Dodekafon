@@ -10,7 +10,7 @@ SimpleDodekafonV1.cpp
 
 #include "DodekafonRecord.h"
 
-int SimpleDodekafonV1_SingleThread(bool listMode)
+size_t SimpleDodekafonV1_SingleThread(bool listMode)
 {
 	std::vector<DodekafonRecord> result;
 
@@ -20,7 +20,7 @@ int SimpleDodekafonV1_SingleThread(bool listMode)
 		for (DodekafonRecord r = start; r.IsThereNext(); r = r.FindNext(diffIterator)) {
 			if (r.IsNewValid(result)) {
 				if (listMode)
-					r.OutputDebugString("Valid record -", DodekafonRecord::RecordMode);
+					r.OutPutDebugString("Valid record -", DodekafonRecord::ODE::RecordMode);
 				result.push_back(r);
 			}
 		}
@@ -30,15 +30,15 @@ int SimpleDodekafonV1_SingleThread(bool listMode)
 }
 
 
-int SimpleDodekafonV1()
+size_t SimpleDodekafonV1()
 {
-	DWORD tc = GetTickCount();
-	int ret = 0;
+	uint64_t tc = GetTickCount64();
+	size_t ret = 0;
 	const int num = 100;
 	for (int i = 0; i < num; ++i) {
 		ret = SimpleDodekafonV1_SingleThread(i==0);
 	}
-	DWORD tc2 = GetTickCount();
+	uint64_t tc2 = GetTickCount64();
 #ifdef _DEBUG_OUTPUTSTR_
 
 	std::string s;
