@@ -127,7 +127,7 @@ size_t MultiThreadDodekafonV1()
 	std::array<uint64_t, DODEKAFON_SIZE> timetickArray{ 0 };
 	uint64_t tc = GetTickCount64();
 	size_t ret = 0;
-	const int num = 100;
+	const int num = 10;
 	for (int i = 0; i < num; ++i) {
 		ReportModeEnum report(i == 0 ? ListMode : NoReportMode);
 		ret = SimpleDodekafonV1_MultiThread(report, timetickArray);
