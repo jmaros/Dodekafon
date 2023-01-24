@@ -32,7 +32,6 @@ void DebugLine (Params const&...	rest)
 template<typename...Params>
 void DebugNewLine (Params const&...	rest)
 {
-	static int n = 0;
 	DebugLine(rest...);
 	DebugPrint("\n");
 }

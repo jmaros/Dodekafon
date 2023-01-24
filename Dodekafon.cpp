@@ -2,8 +2,8 @@
 // Dodekafon.cpp
 //
 
-// g++ -std=c++20 -O2 -Wc++20-compat -Wall -Wpedantic -time ..\Dodekafon.cpp ..\DebugPrint.cpp ..\DodekaInterval.cpp ..\DodekaNode.cpp ..\DodekaPitches.cpp ..\DodekaSpan.cpp -o Dodekafon.exe ; .\Dodekafon.exe
-// g++ -std=c++20 -g3 -Wc++20-compat -Wall -Wpedantic -time ..\Dodekafon.cpp ..\DebugPrint.cpp ..\DodekaInterval.cpp ..\DodekaNode.cpp ..\DodekaPitches.cpp ..\DodekaSpan.cpp -o Dodekafon.exe ; gdb .\Dodekafon.exe
+// g++ -std=c++20 -O2 -Wc++20-compat -Wall -Wpedantic -time ..\Dodekafon.cpp ..\DebugPrint.cpp ..\DebugSolveDodekafon.cpp ..\DodekaInterval.cpp ..\DodekaNode.cpp ..\DodekaPitches.cpp ..\DodekaSpan.cpp ..\Testdata.cpp -o Dodekafon.exe && .\Dodekafon.exe
+// g++ -std=c++20 -g3 -Wc++20-compat -Wall -Wpedantic -time ..\Dodekafon.cpp ..\DebugPrint.cpp ..\DebugSolveDodekafon.cpp ..\DodekaInterval.cpp ..\DodekaNode.cpp ..\DodekaPitches.cpp ..\DodekaSpan.cpp ..\Testdata.cpp -o Dodekafon.exe && gdb .\Dodekafon.exe
 
 #include <iomanip>
 #include <iostream>
@@ -54,130 +54,40 @@ namespace Dodekafon {
 		}
 	}
 
-#define DEBUG_SOLVE_DODECAFON
-#if defined (DEBUG_SOLVE_DODECAFON)
-	struct DebugSolveDodecafon {
-		size_t	m_vertex{};
-		size_t	m_edge{};
-
-		DebugSolveDodecafon (size_t		vertex,
-							 size_t		edge)
-			:	m_vertex(vertex)
-			,	m_edge(edge)
-		{
-		};
-	};
-	//bool operator < (DebugSolveDodecafon lv,
-	//				 DebugSolveDodecafon rv)
-	//{
-	//	return ((lv.m_edge		<	rv.m_edge) ||
-	//			(lv.m_edge		==	rv.m_edge &&
-	//			 lv.m_vertex	<	rv.m_vertex));
-	//}
-	bool operator == (DebugSolveDodecafon lv,
-					  DebugSolveDodecafon rv)
-	{
-		return (lv.m_edge	== rv.m_edge &&
-				lv.m_vertex	== rv.m_vertex);
-	}
-	//bool operator != (DebugSolveDodecafon lv,
-	//				  DebugSolveDodecafon rv)
-	//{
-	//	return (lv.m_edge	!= rv.m_edge ||
-	//			lv.m_vertex	!= rv.m_vertex);
-	//}
-	vector<vector<DebugSolveDodecafon>> DebugSolveDodecafonRefs0 {
-	//   3,  10,   2,  11,   1,  12,   6,   7,   5,   8,   4,   9
-	//	    7    8    9    10   11    6    1    2    3    4    5
-		{{ 1,11}, {11,10}, { 2, 9}, {10, 8}, { 3, 7}, {12, 6},
-		 { 6, 1}, { 7, 2}, { 5, 3}, { 8, 4}, { 4, 5}},
-		{{ 1,11}, { 1,10}, { 2, 9}, { 2, 8}, { 3, 7}, { 6, 6},
-		 { 6, 1}, { 7, 2}, { 5, 3}, { 8, 4}, { 4, 5}}
-	};
-
-	vector<DebugSolveDodecafon> DodekafonToDebugSolveDodecafon (const Array12& dodekafon)
-	{
-		vector<DebugSolveDodecafon> retv;
-		/* TODO */ (dodekafon);
-		return retv;
-	}
-
-	vector<vector<DebugSolveDodecafon>> GenerateDebugSolveDodecafonRefs()
-	{
-		vector<vector<DebugSolveDodecafon>> debugSolveDodecafonRefs;
-		for (const auto & dodekafon : Testdata12) {
-			auto dsds = DodekafonToDebugSolveDodecafon(dodekafon);
-			debugSolveDodecafonRefs.push_back(dsds);
-		}
-		return debugSolveDodecafonRefs;
-	}
-
-	// returns true if there is a matching pattern in debugSolveDodecafonRefs
-	bool debugSolveDodecafonCheck (vector<DebugSolveDodecafon> debugSolveDodecafons)
-	{
-		bool result{};
-		const auto DebugSolveDodecafonRefs = GenerateDebugSolveDodecafonRefs();
-		for (const auto & debugSolveDodecafonRef : DebugSolveDodecafonRefs) {
-			auto debugSolveDodecafonRefIter = debugSolveDodecafonRef.cbegin();
-			bool isDifferent{};
-			for (const auto & debugSolveDodecafon : debugSolveDodecafons) {
-				if (debugSolveDodecafonRefIter != debugSolveDodecafonRef.cend()) {
-					if (debugSolveDodecafon == *debugSolveDodecafonRefIter) {
-						++debugSolveDodecafonRefIter;
-					} else {
-						// this pattern doesn't match, lets check the next one
-						isDifferent = true;
-						break;
-					}
-				} else {
-					result = true;
-				}
-			}
-			if (!isDifferent) {
-				result = true;
-			}
-			if (result) {
-				break;
-			}
-		}
-		return result;
-	}
-#endif
-
 	//
 	// Recursive algorithm to solve the problem
 	//
-	void SolveDodekafon (size_t				intervalWidth,
-						 const Spans&		sRef,
-#if defined (DEBUSOL)
-						 vector<DebuSol>&	debuSols,
+	void SolveDodekafon (size_t							intervalWidth,
+						 const Spans&					sRef,
+#if defined (DEBUG_SOLVE_DODEKAFON)
+						 vector<DebugSolveDodekafon>&	debuSols,
 #endif
-						 vector<Spans>&		result)
+						 vector<Spans>&					result)
 	{
 		if (intervalWidth > 0) {
 
 			for (size_t i = 1; i + intervalWidth < sRef.NodesSize(); ++i) {
 				// Create a copy for each possible tree branch
 				Spans ls(sRef);
-#if defined (DEBUSOL)
+#if defined (DEBUG_SOLVE_DODEKAFON)
 				const auto& nodi = ls.GetNode(i);
 				const auto& nodj = ls.GetNode(i + intervalWidth);
 #endif
 			// Try to add the actual interval to the spans registry
 				if (ls.AddInterval(intervalWidth, i)) {
-#if defined (DEBUSOL)
-					debuSols.push_back(DebuSol(nodi.GetPitch(), intervalWidth));
+#if defined (DEBUG_SOLVE_DODEKAFON)
+					debuSols.push_back(DebugSolveDodekafon(nodi.GetPitch(), intervalWidth, Direction::Up));
 #endif
 						// Recurse on success with one shorter interval
 					SolveDodekafon (intervalWidth - 1,		// recursion, Downward
 									ls,
-#if defined (DEBUSOL)
+#if defined (DEBUG_SOLVE_DODEKAFON)
 									debuSols,
 #endif
 									result);
-#if defined (DEBUSOL)
+#if defined (DEBUG_SOLVE_DODEKAFON)
 				} else {
-					if (DebuSolCheck (debuSols)) {
+					if (debugSolveDodekafonCheck (debuSols)) {
 						DebugLine(", Rejected sequence length = ",
 								  setw(2), debuSols.size());
 						DebugPrint(" {vert1,edge1} =",
@@ -232,12 +142,12 @@ int main ()
 	std::vector<Spans>    result;
 
 	try {
-#if defined (DEBUSOL)
-		vector<DebuSol> debugs;
+#if defined (DEBUG_SOLVE_DODEKAFON)
+		vector<DebugSolveDodekafon> debugs;
 #endif
 			SolveDodekafon(MaxIntervalLength,
 					   spans,
-#if defined (DEBUSOL)
+#if defined (DEBUG_SOLVE_DODEKAFON)
 					   debugs,
 #endif
 					   result);
