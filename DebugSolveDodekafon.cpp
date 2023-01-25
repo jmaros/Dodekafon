@@ -122,20 +122,31 @@ namespace Dodekafon {
 			}
 		}
 #else //!ELENDIR
-		// const std::array<Array11, 1328>
+		[[maybe_unused]]	size_t breki{};
+		size_t breko{};
+		size_t testdataIndex{};
+		// Testdata11 is const std::array<Array11, 1328>
 		for (const auto& Data11 : Testdata11) {
+			++testdataIndex;
 			// initialize an iterator for the rejected sequence:
 			auto debugSolveDodekafonRefIter = debugSolveDodekafons.cbegin();
 			for (const auto& Data : Data11) {
 				size_t	interval	= std::get<0>(Data);
 				size_t	edge		= std::get<1>(Data);
 				int		direction	= std::get<2>(Data);
-				DebugSolveDodekafon dsd (interval, edge, direction);
+				if (Direction(direction) == Direction::Down) {
+					if (edge > interval) {
+						edge -= interval;
+					} else {
+						++breki;
+					}
+				}
+				DebugSolveDodekafon dsd (edge, interval, direction);
 				if (debugSolveDodekafonRefIter->m_edge == dsd.m_edge &&
 					debugSolveDodekafonRefIter->m_vertex == dsd.m_vertex) {
 					if (UnderlyingType(debugSolveDodekafonRefIter->m_edgeDirection) != direction) {
 						// Other direction
-						break;
+						++breko;
 					}
 				} else {
 					// different interval or edge
@@ -144,6 +155,7 @@ namespace Dodekafon {
 				++debugSolveDodekafonRefIter;
 				if (debugSolveDodekafonRefIter == debugSolveDodekafons.cend()) {
 					// matches all the way down
+					std::cout << " Index = " << std::setw(4) << testdataIndex << " ";
 					result = true;
 					break;
 				}
@@ -151,6 +163,10 @@ namespace Dodekafon {
 			if (result == true) {
 				break;
 			}
+		}
+		if (breko) {
+			static size_t brekos{};
+			brekos += breko;
 		}
 #endif //ELENDIR
 		return result;

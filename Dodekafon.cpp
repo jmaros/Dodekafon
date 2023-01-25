@@ -88,31 +88,22 @@ namespace Dodekafon {
 #if defined (DEBUG_SOLVE_DODEKAFON)
 				} else {
 					if (debugSolveDodekafonCheck (debuSols)) {
-						DebugLine(", Rejected sequence length = ",
-								  setw(2), debuSols.size());
-						DebugPrint(" {vert1,edge1} =",
-								   setw(2), debuSols.front().m_vertex);
-						DebugPrint(",",
-								   setw(2), debuSols.front().m_edge);
-						DebugPrint("}");
-								   if (debuSols.size() > 2) {
-							DebugPrint(" Other {vertex,edge} pairs: ");
-							for (auto vep = 1U; vep + 1 < debuSols.size(); ++vep) {
-								DebugPrint("  {",
-										   setw(2), debuSols[vep].m_vertex, ",",
-										   setw(2), debuSols[vep].m_edge, "}");
-							}
+						DebugLine(", Rejected length = ",
+								  setw(2), debuSols.size(),
+								  " Interval = ",
+								  setw(2), intervalWidth);
+						DebugPrint(" {vertex,edge} pairs: ");
+						for (auto vep = 0u; vep < debuSols.size(); ++vep) {
+							DebugPrint("{",
+										setw(2), debuSols[vep].m_vertex, ",",
+										setw(2), debuSols[vep].m_edge, "}");
 						}
 
-						DebugPrint(" Last {vertex, edge} pair ={",
-								   setw(2), debuSols.back().m_vertex, ",",
-								   setw(2), debuSols.back().m_edge, "}");
-						DebugPrint(" At interval = ",
-								   setw(2), intervalWidth, "\n");
+						DebugPrint("\n");
 					}
 					if (!nodi.IsMidPoint() && !nodj.IsMidPoint()) {
-						const auto stat1 = (nodi.IsMidPoint() ? " MiddlePoint" : "git add     ");
-						const auto stat2 = (nodj.IsMidPoint() ? " MiddlePoint" : "git add     ");
+						const auto stat1 = (nodi.IsMidPoint() ? " MiddlePoint" : "            ");
+						const auto stat2 = (nodj.IsMidPoint() ? " MiddlePoint" : "            ");
 						DebugNewLine(", Rejected interval = ",
 									 setw(2), intervalWidth,
 									 ". Pos(", setw(2), i, ") = ",
