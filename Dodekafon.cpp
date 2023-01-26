@@ -721,12 +721,13 @@ size_t mainSolveDodekafon()
 		SolveDodekafon(MaxIntervalLength,
 					   spans,
 					   result);
-
+		[[likely]]
 		cout << "Dodekafon 1 --> " << SpanWidth << endl;
 
 		PrintDodekafon (result);
 	}
 	catch (...) {
+		[[unlikely]]
 		cout << "Unexpected error occured!" << endl;
 	}
 	return result.size();
