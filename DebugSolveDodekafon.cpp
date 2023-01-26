@@ -15,6 +15,7 @@ namespace Dodekafon {
 
 	using std::vector;
 
+	[[maybe_unused]]
 	bool operator < (DebugSolveDodekafon lv,
 					 DebugSolveDodekafon rv)
 	{
@@ -30,6 +31,7 @@ namespace Dodekafon {
 				lv.m_vertex == rv.m_vertex);
 	}
 
+	//[[maybe_unused]]
 	//bool operator != (DebugSolveDodekafon lv,
 	//				  DebugSolveDodekafon rv)
 	//{
@@ -92,6 +94,7 @@ namespace Dodekafon {
 	}
 #endif
 
+	[[nodiscard("Forcing the use of the return value! (C++20)")]]
 	// returns true if there is a matching pattern in debugSolveDodekafonRefs
 	bool debugSolveDodekafonCheck (vector<DebugSolveDodekafon> debugSolveDodekafons)
 	{
@@ -122,7 +125,7 @@ namespace Dodekafon {
 			}
 		}
 #else //!ELENDIR
-		[[maybe_unused]]	size_t breki{};
+		size_t breki{};
 		size_t breko{};
 		size_t testdataIndex{};
 		// Testdata11 is const std::array<Array11, 1328>

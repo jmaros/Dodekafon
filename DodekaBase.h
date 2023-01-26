@@ -4,7 +4,7 @@
 #pragma once
 
 #define DEBUG_SOLVE_DODEKAFON
-#define NoELENDIR
+#define NO_ELENDIR
 
 #include <type_traits>
 #include <cstddef>
