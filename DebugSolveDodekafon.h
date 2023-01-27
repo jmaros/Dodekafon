@@ -4,14 +4,18 @@
 #pragma once
 
 #include "Testdata.h"
+#include "DodekaNode.h"
 
 #if defined (DEBUG_SOLVE_DODEKAFON)
 
+#include <string>
 #include <vector>
 
 namespace Dodekafon {
 
+	using std::string;
 	using std::vector;
+
 	enum class Direction : int {
 		Up		= 1,
 		Invalid	= 0,
@@ -53,7 +57,10 @@ namespace Dodekafon {
 	vector<vector<DebugSolveDodekafon>> GenerateDebugSolveDodekafonRefs();
 
 	// returns true if there is a matching pattern in debugSolveDodekafonRefs
-	bool debugSolveDodekafonCheck (vector<DebugSolveDodekafon> debugSolveDodekafons);
+	bool debugSolveDodekafonCheck (vector<DebugSolveDodekafon>	debugSolveDodekafons,
+								   const Node &					nodi,
+								   const Node &					nodj,
+								   string &						additionalInfo);
 }
 
 #endif // DEBUG_SOLVE_DODEKAFON

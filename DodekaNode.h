@@ -5,10 +5,12 @@
 
 #include <cstddef>
 #include <limits>
+#include <string>
 #include <vector>
 
 namespace Dodekafon {
 
+	using std::string;
 	using std::vector;
 
 	enum class PitchStatus : size_t {
@@ -36,12 +38,13 @@ namespace Dodekafon {
 		inline size_t		GetNumIntervals ()			const;
 		inline PitchStatus	GetPitchStatus ()			const;
 
-		size_t	GetNextInterval (size_t prevInterval)	const;
-
 		bool	IsEmpty ()								const;
 		bool	IsAvailableForIntervalAddition ()		const;
 		bool	IsLeafPoint ()							const;
 		bool	IsMidPoint ()							const;
+
+		string	GetStatusWord ()						const;
+		size_t	GetNextInterval (size_t prevInterval)	const;
 
 	//modifiers
 		inline void	SetPitch		(size_t			newPitch);

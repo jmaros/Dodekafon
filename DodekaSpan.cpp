@@ -1,6 +1,7 @@
 //
 // DodekaSpan.h
 //
+#include <exception>
 #include <iomanip>
 #include <iostream>
 #include <set>
@@ -204,9 +205,9 @@ namespace Dodekafon {
 			if (higherPitch < NodesSize()) {
 				// valid higherPitch
 
-				Node& nlr{ NodeRef(lowerPich) };
-				Node& nhr{ NodeRef(higherPitch) };
-				Interval& ir{ IntervalRef(intervalLength) };
+				Node		nlr{ GetNode(lowerPich) };
+				Node		nhr{ GetNode(higherPitch) };
+				Interval	ir{ GetInterval(intervalLength) };
 
 				if (ir.IsEmpty() &&
 					nlr.IsAvailableForIntervalAddition() &&
@@ -228,9 +229,12 @@ namespace Dodekafon {
 					success = successA && successB;
 				}
 				if (success) {
-					if (nlr.GetPitch() != lowerPich || nhr.GetPitch() != higherPitch) {
-						cout << "\nInternal Error at Spans::AddInterval!\n";
-						// this should rather throw
+					if (nlr.GetPitch() == lowerPich && nhr.GetPitch() == higherPitch) {
+						NodeRef(lowerPich) = nlr;
+						NodeRef(higherPitch) = nhr;
+						IntervalRef(intervalLength) = ir;
+					} else {
+						throw std::logic_error("Internal Error at Spans::AddInterval!");
 					}
 				}
 			}

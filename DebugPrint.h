@@ -5,31 +5,34 @@
 #include <iomanip>
 #include <iostream>
 
-void DebugPrint();
+int  NextDebugLineNumber ();
+void DebugPrint ();
 
 template<typename T>
-void DebugPrint(T const& t)
+void DebugPrint (T const& t)
 {
 	std::cout << t;
 	DebugPrint();
 }
 
-template<typename T, typename...Rest>
-void DebugPrint(T const& t,
-				Rest const&...	rest)
+template<typename T, typename... Rest>
+void DebugPrint (T const&		t,
+				 Rest const&...	rest)
 {
 	std::cout << t;
 	DebugPrint(rest...);
 }
 
-template<typename...Params>
+template<typename... Params>
 void DebugLine (Params const&...	rest)
 {
-	static int n = 0;
-	DebugPrint("Debug line ", std::setw(3), ++n, rest...);
+	DebugPrint("Debug line ",
+			   std::setw(3),
+			   NextDebugLineNumber(),
+			   rest...);
 }
 
-template<typename...Params>
+template<typename... Params>
 void DebugNewLine (Params const&...	rest)
 {
 	DebugLine(rest...);

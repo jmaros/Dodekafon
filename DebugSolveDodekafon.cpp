@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <iomanip>
 #include <iostream>
+#include <sstream>
 
 #include "DebugSolveDodekafon.h"
 
@@ -96,10 +97,16 @@ namespace Dodekafon {
 
 	[[nodiscard("Forcing the use of the return value! (C++20)")]]
 	// returns true if there is a matching pattern in debugSolveDodekafonRefs
-	bool debugSolveDodekafonCheck (vector<DebugSolveDodekafon> debugSolveDodekafons)
+	bool debugSolveDodekafonCheck (vector<DebugSolveDodekafon>	debugSolveDodekafons,
+								   const Node &					nodi,
+								   const Node &					nodj,
+								   string &						additionalInfo)
 	{
 		bool result{};
 #if defined(ELENDIR)
+		additionalInfo;
+		nodi;
+		nodj;
 		static const auto DebugSolveDodekafonRefs = GenerateDebugSolveDodekafonRefs();
 		for (const auto& debugSolveDodekafonRef : DebugSolveDodekafonRefs) {
 			auto debugSolveDodekafonRefIter = debugSolveDodekafonRef.cbegin();
@@ -145,6 +152,18 @@ namespace Dodekafon {
 					}
 				}
 				DebugSolveDodekafon dsd (edge, interval, direction);
+				if (debugSolveDodekafonRefIter == debugSolveDodekafons.cend()) {
+					// matches all the way down
+					std::stringstream st;
+					st << " Index = " << std::setw(4) << testdataIndex << ", ";
+					st << " nodi  = " << nodi.GetPitch() << ", " << nodi.GetStatusWord() << ", ";
+					st << " nodj  = " << nodj.GetPitch() << ", " << nodj.GetStatusWord() << ", ";
+					nodj;
+
+					additionalInfo = st.str();
+					result = true;
+					break;
+				}
 				if (debugSolveDodekafonRefIter->m_edge == dsd.m_edge &&
 					debugSolveDodekafonRefIter->m_vertex == dsd.m_vertex) {
 					if (UnderlyingType(debugSolveDodekafonRefIter->m_edgeDirection) != direction) {
@@ -156,12 +175,6 @@ namespace Dodekafon {
 					break;
 				}
 				++debugSolveDodekafonRefIter;
-				if (debugSolveDodekafonRefIter == debugSolveDodekafons.cend()) {
-					// matches all the way down
-					std::cout << " Index = " << std::setw(4) << testdataIndex << " ";
-					result = true;
-					break;
-				}
 			}
 			if (result == true) {
 				break;

@@ -50,6 +50,18 @@ namespace Dodekafon {
 			GetPitchStatus() == PitchStatus::ValidMidpoint;
 	}
 
+	string		Node::GetStatusWord ()	const
+	{
+		string statWord;
+		switch (GetPitchStatus()) {
+			case PitchStatus::Empty:			statWord = "Empty";		break;
+			case PitchStatus::ValidLeafpoint:	statWord = "Leaf";		break;
+			case PitchStatus::ValidMidpoint:	statWord = "Middle";	break;
+			default:							statWord = "Invalid";	break;
+		}
+		return statWord;
+	}
+
 	size_t		Node::GetNextInterval(size_t prevInterval) const
 	{
 		size_t retv{};

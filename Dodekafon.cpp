@@ -5,6 +5,7 @@
 // g++ -std=c++20 -O2 -Wc++20-compat -Wall -Wpedantic -time ..\Dodekafon.cpp ..\DebugPrint.cpp ..\DebugSolveDodekafon.cpp ..\DodekaInterval.cpp ..\DodekaNode.cpp ..\DodekaPitches.cpp ..\DodekaSpan.cpp ..\Testdata.cpp -o Dodekafon.exe && .\Dodekafon.exe
 // g++ -std=c++20 -g3 -Wc++20-compat -Wall -Wpedantic -time ..\Dodekafon.cpp ..\DebugPrint.cpp ..\DebugSolveDodekafon.cpp ..\DodekaInterval.cpp ..\DodekaNode.cpp ..\DodekaPitches.cpp ..\DodekaSpan.cpp ..\Testdata.cpp -o Dodekafon.exe && gdb .\Dodekafon.exe
 
+#include <exception>
 #include <iomanip>
 #include <iostream>
 #include <set>
@@ -87,29 +88,27 @@ namespace Dodekafon {
 									result);
 #if defined (DEBUG_SOLVE_DODEKAFON)
 				} else {
-					if (debugSolveDodekafonCheck (debuSols)) {
-						DebugLine(", Rejected length = ",
-								  setw(2), debuSols.size(),
-								  " Interval = ",
-								  setw(2), intervalWidth);
-						DebugPrint(" {vertex,edge} pairs: ");
+					string additionalInfo;
+					if (debugSolveDodekafonCheck (debuSols,
+												  nodi,
+												  nodj,
+												  additionalInfo)) {
+						DebugLine(", ", additionalInfo,
+								  "Rejected Number = ", setw(2), debuSols.size(),
+								  " Interval = ", setw(2), intervalWidth);
+						DebugPrint(" {node,edge} pairs: ");
 						for (auto vep = 0u; vep < debuSols.size(); ++vep) {
 							DebugPrint("{",
 										setw(2), debuSols[vep].m_vertex, ",",
 										setw(2), debuSols[vep].m_edge, "}");
 						}
-
 						DebugPrint("\n");
 					}
 					if (!nodi.IsMidPoint() && !nodj.IsMidPoint()) {
-						const auto stat1 = (nodi.IsMidPoint() ? " MiddlePoint" : "            ");
-						const auto stat2 = (nodj.IsMidPoint() ? " MiddlePoint" : "            ");
-						DebugNewLine(", Rejected interval = ",
-									 setw(2), intervalWidth,
-									 ". Pos(", setw(2), i, ") = ",
-									 setw(2), nodi.GetPitch(), stat1,
-									 "; Pos(", setw(2), i + intervalWidth, ") = ",
-									 setw(2), nodj.GetPitch(), stat2);
+						DebugNewLine(", ", additionalInfo,
+									 "Rejected Numbes = ", setw(2), intervalWidth,
+									 ". Pos(", setw(2), nodi.GetPitch(), ") ", nodi.GetStatusWord(),
+									 "; Pos(", setw(2), nodj.GetPitch(), ") ", nodj.GetStatusWord());
 					}
 #endif
 				}
@@ -137,15 +136,18 @@ int main ()
 		vector<DebugSolveDodekafon> debugs;
 #endif
 			SolveDodekafon(MaxIntervalLength,
-					   spans,
+						   spans,
 #if defined (DEBUG_SOLVE_DODEKAFON)
-					   debugs,
+						   debugs,
 #endif
-					   result);
+						   result);
 
 		cout << "Dodekafon 1 --> " << SpanWidth << endl;
 
 		PrintDodekafon (result);
+	}
+	catch (std::exception& e) {
+		std::cerr << "exception caught: " << e.what() << endl;
 	}
 	catch (...) {
 		cout << "Unexpected error occured!" << endl;

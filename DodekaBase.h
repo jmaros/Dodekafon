@@ -3,7 +3,7 @@
 //
 #pragma once
 
-#define DEBUG_SOLVE_DODEKAFON
+#define NO_DEBUG_SOLVE_DODEKAFON
 #define NO_ELENDIR
 
 #include <type_traits>
