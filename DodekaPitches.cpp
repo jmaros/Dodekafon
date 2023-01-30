@@ -12,22 +12,8 @@ using std::setw;
 
 namespace Dodekafon {
 	//
-	// Pitches constructors
+	// Pitches constructors are the defaults
 	//
-	Pitches::Pitches ()
-		: m_pitches	(SpanWidth, 0)
-	{
-	}
-
-	Pitches::Pitches (size_t numPitches)
-		: m_pitches	(numPitches, 0)
-	{
-	}
-
-	Pitches::Pitches (const Pitches& pitchesPar)
-		: m_pitches	(pitchesPar.m_pitches)
-	{
-	}
 
 	// Pitches accessors
 	size_t Pitches::Size () const
@@ -35,9 +21,12 @@ namespace Dodekafon {
 		return m_pitches.size();
 	}
 
-	size_t Pitches::GetPitch (size_t i) const
+	size_t Pitches::GetPitch (size_t index) const
 	{
-		return (i < Size() ? m_pitches[i] : 0);
+		if (index >= Size()) {
+			throw std::out_of_range("Pitches::GetPitch");
+		}
+		return m_pitches[index];
 	}
 
 	// Pitches transformations
@@ -47,7 +36,7 @@ namespace Dodekafon {
 	//
 	Pitches Pitches::GenerateInversion () const
 	{
-		Pitches result(Size());
+		Pitches result;
 		const size_t Complement = Size() + 1;
 		for (size_t i = 0;
 			 i < result.Size();
@@ -62,7 +51,7 @@ namespace Dodekafon {
 	//
 	Pitches Pitches::GenerateRetrograde () const
 	{
-		Pitches result(Size ());
+		Pitches result;
 		const size_t Maxi = Size() - 1;
 		for (size_t i = 0;
 			 i < result.Size();
@@ -77,7 +66,7 @@ namespace Dodekafon {
 	//
 	Pitches Pitches::GenerateRetrogradeInversion () const
 	{
-		Pitches result(Size ());
+		Pitches result;
 		const size_t Complement = Size() + 1;
 		const size_t Maxi = Size() - 1;
 		for (size_t i = 0;
@@ -101,14 +90,13 @@ namespace Dodekafon {
 	}
 
 	// Pitches modifiers
-	bool Pitches::SetPitch (size_t i,
+	void Pitches::SetPitch (size_t index,
 							size_t pitchPar)
 	{
-		bool success{ i < Size() };
-		if (success) {
-			m_pitches[i] = pitchPar;
+		if (index >= Size()) {
+			throw std::out_of_range("Pitches::SetPitch");
 		}
-		return success;
+		m_pitches[index] = pitchPar;
 	}
 
 	// Pitches global operators

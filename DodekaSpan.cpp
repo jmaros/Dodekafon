@@ -18,137 +18,68 @@ namespace Dodekafon {
 	//
 	// Spans constructors
 	//
-	Spans::Spans (size_t n)
-		: m_nodes(n + 1, Node{ 0, PitchStatus::Empty })
-		, m_intervals{ n, Interval{} }
+	Spans::Spans(size_t	firstPitch)
+		:	m_firstPitch	(firstPitch)
 	{
-	}
-
-	Spans::Spans (const Spans& parent)
-		: m_nodes{ parent.m_nodes }
-		, m_intervals{ parent.m_intervals }
-	{
+		if (firstPitch < 1 || firstPitch > MaxPitch) {
+			throw std::out_of_range("Spans::Spans");
+		}
 	}
 
 	//
 	// Spans accessors
 	//
-	size_t	Spans::NodesSize () const
+	size_t	Spans::Size () const
 	{
-		return m_nodes.size();
+		return m_nodeAndEdges.size();
 	}
 
-	size_t	Spans::IntervalsSize () const
+	const NodeAndEdge& Spans::GetNodeAndEdge (size_t	index) const
 	{
-		return m_intervals.size();
-	}
-
-	size_t	Spans::SpanSize () const
-	{
-		return IntervalsSize();
-	}
-
-	const Node& Spans::GetNode (size_t i) const
-	{
-		static const Node invalid{ 0, PitchStatus::Invalid };
-		const Node* result{ &invalid };
-		if (i > 0 && i < m_nodes.size()) {
-			result = &m_nodes[i];
-		} else {
-			cout << "\nInternal Error!\n";
-			// this should rather throw
+		if (index >= m_nodeAndEdges.size()) {
+			throw std::out_of_range("GetNodeAndEdge");
 		}
-		return *result;
+		return m_nodeAndEdges[index];
 	}
 
-	const Interval& Spans::GetInterval (size_t i) const
+	bool	Spans::IsPitchAvailable	(size_t		pitch) const
 	{
-		static const Interval empty;
-		const Interval* result{ &empty };
-		if (i > 0 && i < m_intervals.size()) {
-			result = &m_intervals[i];
-		} else {
-			cout << "\nInternal Error!\n";
-			// this should rather throw
+		if (pitch > MaxPitch) {
+			throw std::out_of_range("IsPitchAvailable");
 		}
-		return *result;
+		return m_pitches.GetPitch(pitch - 1) == 0;
 	}
 
-	Node	Spans::FindFirstNode () const
+	bool	Spans::IsEdgeAvailable (size_t		edge) const
 	{
-		Node	result{ 0, PitchStatus::Invalid };
-		for (size_t i = 1; i < NodesSize(); ++i) {
-			if (GetNode(i).GetPitchStatus() == PitchStatus::Empty) {
-				break;
-			}
-			if (GetNode(i).GetPitchStatus() == PitchStatus::ValidLeafpoint) {
-				result = GetNode(i);
-				break;
-			}
+		if (edge > MaxEdge) {
+			throw std::out_of_range("IsEdgeAvailable");
 		}
-		return result;
-	}
-
-	Node	Spans::FindNextNode (const Node& prevNode,
-								 const Interval& prevInter) const
-	{
-		Node	resultingNode{ 0, PitchStatus::Invalid };
-		size_t	prevPitchIndex{ prevNode.GetPitch() };
-		size_t	pitch0000Index{ prevInter.GetPitch(0) };
-		size_t	pitch0001Index{ prevInter.GetPitch(1) };
-		size_t	nextPitchIndex{};
-
-		if (prevPitchIndex == pitch0000Index) {
-			nextPitchIndex = pitch0001Index;
-		} else if (prevPitchIndex == pitch0001Index) {
-			nextPitchIndex = pitch0000Index;
-		}
-
-		if (nextPitchIndex) {
-			resultingNode = GetNode(nextPitchIndex);
-		}
-		return resultingNode;
+		return m_edges[edge - 1] == 0;
 	}
 
 	bool Spans::IsValidSpan () const
 	{
-		size_t	prevInterval{};
-		Node	node = FindFirstNode();
-		bool	success = node.IsLeafPoint();
+		bool success = Size() > 0;
 		if (success) {
 			set<size_t> nodeIndices;
 			set<size_t> intervalIndices;
 
-		//	size_t		nextPithchi{};
-
-			for (size_t i = 1; i < SpanSize(); ++i) {
-				auto pitchi = node.GetPitch();
+			for (size_t index = 1; index < Size(); ++index) {
+				const auto & nodedge = GetNodeAndEdge(index);
+				auto pitchi = nodedge.GetPitch();
 				if (nodeIndices.insert(pitchi).second == false) {
 					return false;
 				}
-				auto nexti = node.GetNextInterval(prevInterval);
+				auto nexti = nodedge.GetWidth();
 				if (nexti) {
 					if (intervalIndices.insert(nexti).second == false) {
 						return false;
 					}
-					Interval inti{ GetInterval(nexti) };
-					auto nextPitchi = inti.GetNextPitch(pitchi);
-					if (nextPitchi) {
-						node = GetNode(nextPitchi);
-					} else {
+					auto nextPitchi = nodedge.GetNextPitch();
+					if (nextPitchi == 0) {
 						return false;
 					}
-					prevInterval = nexti;
-				}
-			}
-			if (success) {
-				auto pitchi = node.GetPitch();
-				if (nodeIndices.insert(pitchi).second == false) {
-					return false;
-				}
-				success = nodeIndices.size() == SpanWidth;
-				if (success) {
-					success = intervalIndices.size() == MaxIntervalLength;
 				}
 			}
 		}
@@ -158,86 +89,36 @@ namespace Dodekafon {
 	//
 	// Spans modifiers
 	//
-	Node& Spans::NodeRef (size_t  i)
-	{
-		static const Node invalid{ 0, PitchStatus::Empty };
-		static Node myInvalid{ 0, PitchStatus::Empty };
-		if (myInvalid.GetPitchStatus() != invalid.GetPitchStatus()) {
-			myInvalid = invalid;
-			cout << setw(80) << "This should happen only once!\n";
-		}
-		Node* result{ &myInvalid };
-		if (i < NodesSize()) {
-			result = &m_nodes[i];
-		} else {
-			cout << "\nInternal Error!\n";
-			// this should rather throw
-		}
-		return *result;
-	}
-
-	Interval& Spans::IntervalRef (size_t  intervalWidth)
-	{
-		static const Interval empty;
-		static Interval myEmpty{};
-		if (!myEmpty.IsEmpty()) {
-			myEmpty = empty;
-			cout << setw(80) << "This should happen only once!\n";
-		}
-		Interval* result{ &myEmpty };
-		if (intervalWidth < IntervalsSize()) {
-			result = &m_intervals[intervalWidth];
-		} else {
-			cout << "\nInternal Error at Spans::GetIntervalRef!\n";
-			// this should rather throw
-		}
-		return *result;
-	}
-
 	bool	Spans::AddInterval (size_t		intervalLength,
-								size_t		lowerPich)
+								Direction	direction)
 	{
 		bool success{ false };
-		if (intervalLength > 0 && intervalLength < IntervalsSize()) {
+		if (intervalLength > 0 &&
+			intervalLength < EdgeLimit &&
+			IsEdgeAvailable(intervalLength)) {
 			// valid interval length
-
-			size_t higherPitch{ lowerPich + intervalLength };
-			if (higherPitch < NodesSize()) {
-				// valid higherPitch
-
-				Node		nlr{ GetNode(lowerPich) };
-				Node		nhr{ GetNode(higherPitch) };
-				Interval	ir{ GetInterval(intervalLength) };
-
-				if (ir.IsEmpty() &&
-					nlr.IsAvailableForIntervalAddition() &&
-					nhr.IsAvailableForIntervalAddition()) {
-					// This interval can be added
-					ir.Init(intervalLength, lowerPich);
-					bool	successA{};
-					if (nlr.IsEmpty()) {
-						successA = nlr.InitLeafNode(intervalLength, lowerPich);
-					} else if (nlr.IsLeafPoint()) {
-						successA = nlr.InitMiddleNode(intervalLength, lowerPich);
-					}
-					bool	successB{};
-					if (nhr.IsEmpty()) {
-						successB = nhr.InitLeafNode(intervalLength, higherPitch);
-					} else if (nlr.IsLeafPoint()) {
-						successB = nhr.InitMiddleNode(intervalLength, higherPitch);
-					}
-					success = successA && successB;
-				}
-				if (success) {
-					if (nlr.GetPitch() == lowerPich && nhr.GetPitch() == higherPitch) {
-						NodeRef(lowerPich) = nlr;
-						NodeRef(higherPitch) = nhr;
-						IntervalRef(intervalLength) = ir;
-					} else {
-						throw std::logic_error("Internal Error at Spans::AddInterval!");
-					}
-				}
+			size_t firstPitch{ m_firstPitch };
+			if (Size() > 0) {
+				NodeAndEdge last = m_nodeAndEdges.back();
+				firstPitch = last.GetNextPitch();
 			}
+
+			NodeAndEdge newNodeAndAngle;
+			newNodeAndAngle.Init(intervalLength,
+								 firstPitch,
+								 direction);
+
+			// check whether the first pich is still available
+			if (newNodeAndAngle.IsValid()		&&
+				IsPitchAvailable(firstPitch)	&&
+				IsPitchAvailable(newNodeAndAngle.GetNextPitch())) {
+				m_firstPitch = newNodeAndAngle.GetNextPitch();
+				m_pitches.SetPitch(firstPitch - 1, firstPitch);
+				m_edges[intervalLength - 1] = intervalLength;
+				m_nodeAndEdges.push_back(newNodeAndAngle);
+				success = true;
+			}
+
 		}
 		return success;
 	}
@@ -257,28 +138,20 @@ namespace Dodekafon {
 	//
 	Pitches Spans::ExtractPitches() const
 	{
-		Pitches		result(SpanSize ());
-		Node		node = FindFirstNode();
-		if (node.IsLeafPoint()) {
-			size_t intervalIndex = node.GetInterval(0);
-			Interval	prevInterval = GetInterval(intervalIndex);
-			for (size_t i = 0;
-				 i < result.Size() &&
-				 node.GetPitchStatus() != PitchStatus::Invalid;
-				 ++i) {
-				result.SetPitch(i, node.GetPitch());
-				if (i > 0 && node.IsLeafPoint()) {
-					break;
+		Pitches		result;
+		if (Size() > 0 &&
+			Size() < EdgeLimit) {
+			 size_t nextPitch = GetNodeAndEdge(0).GetPitch();
+		//	 if (nextPitch != m_firstPitch) {
+		//		 throw  std::logic_error("Spans::ExtractPitches#1");
+		//	 }
+			 size_t pitchIndex{};
+			for (const auto& nodeAndEdge : m_nodeAndEdges) {
+				if (nextPitch != nodeAndEdge.GetPitch()) {
+					throw  std::logic_error("Spans::ExtractPitches");
 				}
-				Node		prevNode{ node };
-				node = FindNextNode(prevNode,
-									prevInterval);
-				intervalIndex = node.GetNextInterval(prevInterval.GetWidth());
-				if (intervalIndex) {
-					prevInterval = GetInterval(intervalIndex);
-				} else {
-					prevInterval = Interval();
-				}
+				result.SetPitch(pitchIndex++, nextPitch);
+				nextPitch = nodeAndEdge.GetNextPitch();
 			}
 		}
 		return result;

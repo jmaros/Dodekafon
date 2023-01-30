@@ -3,37 +3,36 @@
 //
 #pragma once
 
-#include <vector>
+#include <array>
+
+#include "DodekaBase.h"
 
 namespace Dodekafon {
 
-	using std::vector;
+	using std::array;
 
 
 	class Pitches {
 
-		vector<size_t>		m_pitches;		// Integer 1..12 representing the pitch,
-											// 0 denotes the emptyness
-											// Note: this vector is indexed 0-based indices
+		array<size_t, MaxPitch>	m_pitches{};		// Integer 1..12 representing the pitch,
+													// 0 denotes the emptyness
+													// Note: this array is indexed 0-based indices
 	public:
 	//constructors
-		Pitches ();
-		explicit Pitches (size_t numPitches);
-		Pitches (const Pitches& pitchesPar);
-
+		//the defaults are used
 	//accessors
-		size_t Size () const;
-		size_t GetPitch (size_t i) const;
-
-	//modifiers
-		bool SetPitch (size_t i,
-					   size_t pitchPar);
+		size_t	Size		()					const;
+		size_t	GetPitch	(size_t index)		const;
 
 	//transformations
-		Pitches			GenerateInversion()				const;
-		Pitches			GenerateRetrograde()			const;
-		Pitches			GenerateRetrogradeInversion()	const;
-		void			Dump()							const;
+		Pitches	GenerateInversion			()	const;
+		Pitches	GenerateRetrograde			()	const;
+		Pitches	GenerateRetrogradeInversion	()	const;
+		void	Dump						()	const;
+
+	//modifiers
+		void SetPitch (size_t index,
+					   size_t pitchPar);
 
 		friend bool operator < (const Pitches& pitchesLeft,
 								const Pitches& pitchesRight);

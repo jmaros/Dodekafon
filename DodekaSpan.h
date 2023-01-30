@@ -2,12 +2,14 @@
 // DodekaSpan.h
 //
 #pragma once
+#include <vector>
 
-#include "DodekaNode.h"
-#include "DodekaInterval.h"
+#include "NodeAndEdge.h"
 #include "DodekaPitches.h"
 
 namespace Dodekafon {
+
+	using std::vector;
 
 	// The goal is to find all such series, where the elements are
 	// all the integer values of the [1,12] closed interval, and the absolut values
@@ -21,33 +23,30 @@ namespace Dodekafon {
 	//  2, 9, 1, 10, 0, 11, 5, 6, 4, 7, 3, 8
 
 	class Spans {
-		vector<Node>		m_nodes;
-		vector<Interval>    m_intervals;
+		array<size_t, MaxEdge>	m_edges{};
+		size_t					m_firstPitch{};
+		Pitches					m_pitches;		// The value of "m_pitches[pitch - 1]" must be either 0,
+												// or pitch. This is used as an inventory of pitches.
+		vector<NodeAndEdge>		m_nodeAndEdges;	// A sequence of nodes(pitchel) and edges(intervals)
+												// the last pitch is not stored, it has to be derived.
 	public:
 	//constructors
-		Spans	(size_t n);
-		Spans	(const Spans& parent);
+		explicit Spans(size_t	firstPitch);
+		// use defaults
+		Spans() = default;
 
 	//accessors
-		size_t			NodesSize ()			const;
-		size_t			IntervalsSize ()		const;
-		size_t			SpanSize ()				const;
-		const Node& GetNode (size_t i)		const;
-		const Interval& GetInterval (size_t i)	const;
-		Node			FindFirstNode ()		const;
-
-		Node			FindNextNode (const Node& prevNode,
-									  const Interval& prevInter) const;
+		size_t					Size				()					const;
+		const	NodeAndEdge &	GetNodeAndEdge		(size_t		index)	const;
+		bool					IsPitchAvailable	(size_t		pitch)	const;
+		bool					IsEdgeAvailable		(size_t		edge)	const;
 
 		bool			IsValidSpan ()			const;
 		Pitches			ExtractPitches ()		const;
 
 	//modifiers
-		Node& NodeRef (size_t i);
-		Interval& IntervalRef (size_t intervalWidth);
-
 		bool	AddInterval (size_t		intervalLength,
-							 size_t		lowerPich);
+							 Direction	direction);
 	//utilities
 		vector<Pitches>	GenerateVariations ()		const;
 		bool			CopyValidSpan (Spans& ls)	const;

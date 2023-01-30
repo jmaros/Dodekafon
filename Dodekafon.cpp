@@ -58,68 +58,48 @@ namespace Dodekafon {
 	//
 	// Recursive algorithm to solve the problem
 	//
-	void SolveDodekafon (size_t							intervalWidth,
-						 const Spans&					sRef,
-#if defined (DEBUG_SOLVE_DODEKAFON)
-						 vector<DebugSolveDodekafon>&	debuSols,
-#endif
+	void SolveDodekafon (const Spans&					sRef,
 						 vector<Spans>&					result)
 	{
-		if (intervalWidth > 0) {
+		if (sRef.Size() < MaxEdge) {
 
-			for (size_t i = 1; i + intervalWidth < sRef.NodesSize(); ++i) {
-				// Create a copy for each possible tree branch
-				Spans ls(sRef);
-#if defined (DEBUG_SOLVE_DODEKAFON)
-				const auto& nodi = ls.GetNode(i);
-				const auto& nodj = ls.GetNode(i + intervalWidth);
-#endif
-			// Try to add the actual interval to the spans registry
-				if (ls.AddInterval(intervalWidth, i)) {
-#if defined (DEBUG_SOLVE_DODEKAFON)
-					debuSols.push_back(DebugSolveDodekafon(nodi.GetPitch(), intervalWidth, Direction::Up));
-#endif
-						// Recurse on success with one shorter interval
-					SolveDodekafon (intervalWidth - 1,		// recursion, Downward
-									ls,
-#if defined (DEBUG_SOLVE_DODEKAFON)
-									debuSols,
-#endif
-									result);
-#if defined (DEBUG_SOLVE_DODEKAFON)
-				} else {
-					string additionalInfo;
-					if (debugSolveDodekafonCheck (debuSols,
-												  nodi,
-												  nodj,
-												  additionalInfo)) {
-						DebugLine(", ", additionalInfo,
-								  "Rejected Number = ", setw(2), debuSols.size(),
-								  " Interval = ", setw(2), intervalWidth);
-						DebugPrint(" {node,edge} pairs: ");
-						for (auto vep = 0u; vep < debuSols.size(); ++vep) {
-							DebugPrint("{",
-										setw(2), debuSols[vep].m_vertex, ",",
-										setw(2), debuSols[vep].m_edge, "}");
+			for (size_t intervalLength = 1;
+				 intervalLength < EdgeLimit;
+				 ++intervalLength) {
+				if (sRef.IsEdgeAvailable(intervalLength)) {
+					// check for both direction
+					for (const auto direction : Directions) {
+						// Create a copy for each possible tree branch
+						Spans ls(sRef);
+						// Try to add the actual interval to the spans registry
+						if (ls.AddInterval(intervalLength,
+										   direction)) {
+								// Recurse on success with one shorter interval
+							SolveDodekafon (ls,
+											result);
 						}
-						DebugPrint("\n");
 					}
-					if (!nodi.IsMidPoint() && !nodj.IsMidPoint()) {
-						DebugNewLine(", ", additionalInfo,
-									 "Rejected Numbes = ", setw(2), intervalWidth,
-									 ". Pos(", setw(2), nodi.GetPitch(), ") ", nodi.GetStatusWord(),
-									 "; Pos(", setw(2), nodj.GetPitch(), ") ", nodj.GetStatusWord());
-					}
-#endif
+
 				}
 			}
 		} else {
 			// If we managed to get here than we have a possible new resulting span
-			Spans ls(sRef.SpanSize());
+			Spans ls;
 			if (sRef.CopyValidSpan(ls)) {
 				result.push_back(ls);
 			}
 		}
+	}
+
+	void SolveDodekafon (vector<Spans>& result)
+	{
+		// exclude the mirrored sequences
+		for (size_t pitch = 1; pitch < (MaxPitch + (MaxPitch & 1) / 2) + 1; ++pitch) {
+			Spans	spans { pitch };
+			SolveDodekafon (spans,
+							result);
+		}
+
 	}
 }
 
@@ -128,21 +108,12 @@ using namespace Dodekafon;
 /// @return The return value is an integer, automatically provided as 0, when the extlicit return is omitterd
 int main ()
 {
-	Spans			     spans(SpanWidth);
 	std::vector<Spans>    result;
 
 	try {
-#if defined (DEBUG_SOLVE_DODEKAFON)
-		vector<DebugSolveDodekafon> debugs;
-#endif
-			SolveDodekafon(MaxIntervalLength,
-						   spans,
-#if defined (DEBUG_SOLVE_DODEKAFON)
-						   debugs,
-#endif
-						   result);
+			SolveDodekafon(result);
 
-		cout << "Dodekafon 1 --> " << SpanWidth << endl;
+		cout << "Dodekafon 1 --> " << MaxPitch << endl;
 
 		PrintDodekafon (result);
 	}
