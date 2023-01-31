@@ -23,7 +23,8 @@ namespace Dodekafon {
 
 	size_t Pitches::GetPitch (size_t index) const
 	{
-		if (index >= Size()) {
+		if (index >= Size() ||
+			Size() == 0) {
 			throw std::out_of_range("Pitches::GetPitch");
 		}
 		return m_pitches[index];
@@ -37,7 +38,6 @@ namespace Dodekafon {
 	Pitches Pitches::GenerateInversion () const
 	{
 		Pitches result;
-		const size_t Complement = Size() + 1;
 		for (size_t i = 0;
 			 i < result.Size();
 			 ++i) {
@@ -67,7 +67,6 @@ namespace Dodekafon {
 	Pitches Pitches::GenerateRetrogradeInversion () const
 	{
 		Pitches result;
-		const size_t Complement = Size() + 1;
 		const size_t Maxi = Size() - 1;
 		for (size_t i = 0;
 			 i < result.Size();

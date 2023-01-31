@@ -42,6 +42,8 @@ namespace Dodekafon {
 		bool					IsEdgeAvailable		(size_t		edge)	const;
 
 		bool			IsValidSpan ()			const;
+		size_t			GetFirstPitch ()		const;
+		size_t			GetLastPitch ()			const;
 		Pitches			ExtractPitches ()		const;
 
 	//modifiers

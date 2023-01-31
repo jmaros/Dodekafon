@@ -11,6 +11,7 @@ namespace Dodekafon {
 	const size_t	MaxPitch{ 12 };					// Number of elements in the sound queue
 	const size_t	PitchLimit{ MaxPitch + 1 };		// Pitch limit, larger
 													// than the max pitch value
+	const size_t	Complement{ PitchLimit };
 	const size_t	EdgeLimit{ MaxPitch };			// Edge upper limit, any smaller positive nonzero integer
 													// represent a valid edge length value
 													// Same as the limit for the max number of edges

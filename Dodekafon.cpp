@@ -98,7 +98,14 @@ namespace Dodekafon {
 			// If we managed to get here than we have a possible new resulting span
 			Spans ls;
 			if (sRef.CopyValidSpan(ls)) {
-				result.push_back(ls);
+				size_t fp = ls.GetFirstPitch();
+				size_t ft = Complement - fp;
+				size_t lp = ls.GetLastPitch();
+				size_t lt = Complement - lp;
+				size_t mp = std::min(std::min(fp, ft), std::min(lp, lt));
+				if (fp == mp) {
+					result.push_back(ls);
+				}
 			}
 		}
 	}

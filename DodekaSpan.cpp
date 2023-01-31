@@ -36,7 +36,8 @@ namespace Dodekafon {
 
 	const NodeAndEdge& Spans::GetNodeAndEdge (size_t	index) const
 	{
-		if (index >= m_nodeAndEdges.size()) {
+		if (index >= m_nodeAndEdges.size() ||
+			m_nodeAndEdges.size() == 0) {
 			throw std::out_of_range("GetNodeAndEdge");
 		}
 		return m_nodeAndEdges[index];
@@ -133,6 +134,16 @@ namespace Dodekafon {
 		return success;
 	}
 
+	size_t Spans::GetFirstPitch () const
+	{
+		return GetNodeAndEdge(0).GetPitch();
+	}
+
+	size_t Spans::GetLastPitch () const
+	{
+		return GetNodeAndEdge(Size() - 1).GetNextPitch();
+	}
+
 	//
 	// Converting to time based representation of the notes
 	//
@@ -141,7 +152,7 @@ namespace Dodekafon {
 		Pitches		result;
 		if (Size() > 0 &&
 			Size() < EdgeLimit) {
-			 size_t nextPitch = GetNodeAndEdge(0).GetPitch();
+			 size_t nextPitch = GetFirstPitch();
 			 size_t pitchIndex{};
 			for (const auto& nodeAndEdge : m_nodeAndEdges) {
 				if (nextPitch != nodeAndEdge.GetPitch()) {
@@ -150,6 +161,7 @@ namespace Dodekafon {
 				result.SetPitch(pitchIndex++, nextPitch);
 				nextPitch = nodeAndEdge.GetNextPitch();
 			}
+			// set last pitch
 			result.SetPitch(pitchIndex++, nextPitch);
 		}
 		return result;
