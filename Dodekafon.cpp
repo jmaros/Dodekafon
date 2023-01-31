@@ -39,7 +39,7 @@ namespace Dodekafon {
 					++d;
 					cout << "-";
 				}
-				cout << setw(3) << n << "." << ++v << " series: ";
+				cout << setw(4) << n << "." << ++v << " series: ";
 				rsi.Dump();
 				cout << endl;
 			}
@@ -49,7 +49,7 @@ namespace Dodekafon {
 		cout << endl;
 		size_t m = 0;
 		for (auto & slm : sortedList) {
-			cout << setw(3) << ++m << ". sorted: ";
+			cout << setw(4) << ++m << ". sorted: ";
 			slm.Dump();
 			cout << endl;
 		}
@@ -77,9 +77,21 @@ namespace Dodekafon {
 								// Recurse on success with one shorter interval
 							SolveDodekafon (ls,
 											result);
+						} else {
+							static bool debugNow = false;
+							if (debugNow) {
+								DebugLine(", Couldn't add interval(", intervalLength,
+										  ", ", UnderlyingType(direction), ") to {");
+								auto sep = " ";
+								auto pitches = ls.ExtractPitches();
+								for (size_t i = 0; i < pitches.Size() && pitches.GetPitch(i); ++i) {
+									DebugPrint(sep, pitches.GetPitch(i));
+									sep = ", ";
+								}
+								DebugPrint(" }\n");
+							}
 						}
 					}
-
 				}
 			}
 		} else {
@@ -94,7 +106,7 @@ namespace Dodekafon {
 	void SolveDodekafon (vector<Spans>& result)
 	{
 		// exclude the mirrored sequences
-		for (size_t pitch = 1; pitch < (MaxPitch + (MaxPitch & 1) / 2) + 1; ++pitch) {
+		for (size_t pitch = 1; pitch < ((MaxPitch + 1) / 2) + 1; ++pitch) {
 			Spans	spans { pitch };
 			SolveDodekafon (spans,
 							result);

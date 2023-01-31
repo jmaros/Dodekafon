@@ -39,11 +39,11 @@ namespace Dodekafon {
 		}
 		if (m_direction == Direction::Down) {
 			if (m_pitch > m_width &&
-				m_pitch - m_width < MaxPitch) {
+				m_pitch - m_width < PitchLimit) {
 				return true;
 			}
 		} else if (m_direction == Direction::Up) {
-			if (m_pitch + m_width < MaxPitch) {
+			if (m_pitch + m_width < PitchLimit) {
 				return true;
 			}
 		}

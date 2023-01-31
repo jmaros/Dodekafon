@@ -142,9 +142,6 @@ namespace Dodekafon {
 		if (Size() > 0 &&
 			Size() < EdgeLimit) {
 			 size_t nextPitch = GetNodeAndEdge(0).GetPitch();
-		//	 if (nextPitch != m_firstPitch) {
-		//		 throw  std::logic_error("Spans::ExtractPitches#1");
-		//	 }
 			 size_t pitchIndex{};
 			for (const auto& nodeAndEdge : m_nodeAndEdges) {
 				if (nextPitch != nodeAndEdge.GetPitch()) {
@@ -153,6 +150,7 @@ namespace Dodekafon {
 				result.SetPitch(pitchIndex++, nextPitch);
 				nextPitch = nodeAndEdge.GetNextPitch();
 			}
+			result.SetPitch(pitchIndex++, nextPitch);
 		}
 		return result;
 	}
